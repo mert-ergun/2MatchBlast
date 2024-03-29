@@ -375,7 +375,7 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_text: Level 1
+  m_text: Level 99
   m_isRightToLeft: 0
   m_fontAsset: {fileID: 11400000, guid: 38bf21c991f7a9042ab58c410434c0b4, type: 2}
   m_sharedMaterial: {fileID: -1808394328088422661, guid: 38bf21c991f7a9042ab58c410434c0b4, type: 2}
@@ -621,6 +621,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 2960a6335b45f9649be8ede119da62e8, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  levelSaver: {fileID: 1691010736}
 --- !u!1 &1549134389
 GameObject:
   m_ObjectHideFlags: 0
@@ -745,6 +746,7 @@ GameObject:
   - component: {fileID: 1691010735}
   - component: {fileID: 1691010734}
   - component: {fileID: 1691010733}
+  - component: {fileID: 1691010736}
   m_Layer: 0
   m_Name: EventSystem
   m_TagString: Untagged
@@ -802,6 +804,19 @@ Transform:
   m_Children: []
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &1691010736
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1691010732}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 37fd9c22d1347334f8751a36af7daec0, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  level: 1
 --- !u!1 &1696681146
 GameObject:
   m_ObjectHideFlags: 0

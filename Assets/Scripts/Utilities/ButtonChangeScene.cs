@@ -1,11 +1,32 @@
 using System.Collections;
 using System.Collections.Generic;
+using TMPro;
 using UnityEngine;
 using UnityEngine.SceneManagement;
+using UnityEngine.UI;
 
 public class ButtonChangeScene : MonoBehaviour
 {
-    // Wait for animation to finish and then change scene
+    private TextMeshProUGUI buttonText;
+
+    [SerializeField]
+    private LevelSaver levelSaver;
+
+    private void Start()
+    {
+        buttonText = GetComponentInChildren<TextMeshProUGUI>();
+        UpdateLevelButtonText();
+    }
+
+    public void UpdateLevelButtonText()
+    {
+        if (buttonText != null)
+        {
+            buttonText.text = "Level " + levelSaver.level;
+        }
+    }
+
+
     public void ChangeScene(string sceneName)
     {
         StartCoroutine(ChangeSceneCoroutine(sceneName));
