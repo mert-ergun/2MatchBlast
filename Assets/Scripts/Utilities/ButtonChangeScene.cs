@@ -22,6 +22,11 @@ public class ButtonChangeScene : MonoBehaviour
     {
         if (buttonText != null)
         {
+            if (levelSaver.level == 11)
+            {
+                buttonText.text = "Finished";
+                return;
+            }
             buttonText.text = "Level " + levelSaver.level;
         }
     }
@@ -29,6 +34,7 @@ public class ButtonChangeScene : MonoBehaviour
 
     public void ChangeScene(string sceneName)
     {
+        if (levelSaver.level == 11) return;
         StartCoroutine(ChangeSceneCoroutine(sceneName));
     }
 
