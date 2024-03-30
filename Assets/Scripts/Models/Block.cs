@@ -11,9 +11,10 @@ public class Block : MonoBehaviour
 
     public BlockType type;
 
+    // When clicked, activate the block
     protected virtual void OnMouseDown()
     {
-        Debug.Log("Block clicked: " + type);
+        ActivateBlock();
     }
 
     // Common functionality that might be overridden in derived classes

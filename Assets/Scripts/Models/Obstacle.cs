@@ -32,6 +32,7 @@ public class Obstacle : Block
     {
         base.ActivateBlock();
         // Additional activation logic for Obstacles
+        Debug.Log("Obstacle type: " + obstacleType);
     }
 
     private void UpdateObstacleAppearance()

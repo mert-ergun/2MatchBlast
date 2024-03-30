@@ -4,6 +4,8 @@ using UnityEngine.UI;
 using static Unity.Collections.AllocatorManager;
 using TMPro;
 using UnityEditor.Build.Reporting;
+using System.Linq;
+using UnityEditor;
 
 [System.Serializable]
 public class LevelData
@@ -13,6 +15,7 @@ public class LevelData
     public int grid_height;
     public int move_count;
     public string[] grid;
+    public LevelGoal[] goals = new LevelGoal[0];
 }
 
 [System.Serializable]
@@ -30,6 +33,8 @@ public class LevelInitializer : MonoBehaviour
     public GameObject cubePrefab;
     public GameObject obstaclePrefab;
     public GameObject tntPrefab;
+    public GameObject goalPrefab;
+    public Transform goalParent;
     public LevelSaver levelSaver;
     public GameObject blocks;
 
@@ -57,8 +62,9 @@ public class LevelInitializer : MonoBehaviour
         // Calculate step based on block size
         step = blockSize.x * blockPrefab.transform.localScale.x;
 
+
         // Stretch grid_background based on grid_width and grid_height
-        Vector2 gridScale = new Vector2(levelData.grid_width - step / 2, levelData.grid_height - step / 2);
+        Vector2 gridScale = new Vector2(levelData.grid_width - step / 2, levelData.grid_height - (step / 2) + 0.066f);
         SpriteRenderer spriteRenderer = gridBackground.GetComponent<SpriteRenderer>();
         spriteRenderer.size = gridScale;
 
@@ -90,10 +96,25 @@ public class LevelInitializer : MonoBehaviour
                 blockObject = Instantiate(obstaclePrefab, position, Quaternion.identity);
                 blockObject.transform.parent = blocks.transform;
                 blockObject.GetComponent<Obstacle>().SetType(blockType);
+
+                // If this type of block is not already in the list of obstacles, add it, otherwise increment the count
+                if (!levelData.goals.Any(goal => goal.type == blockType))
+                {
+                    LevelGoal newGoal = new LevelGoal();
+                    newGoal.type = blockType;
+                    newGoal.count = 1;
+                    ArrayUtility.Add(ref levelData.goals, newGoal);
+                } else
+                {
+                    levelData.goals.First(goal => goal.type == blockType).count++;
+                }
+                
             }
             // Set order in layer
             blockObject.GetComponent<SpriteRenderer>().sortingOrder = i;
         }
+
+        InitializeGoals(levelData);
     }
 
     private Vector2 CalculatePosition(int index, int width, int height)
@@ -113,6 +134,68 @@ public class LevelInitializer : MonoBehaviour
 
         return new Vector2(xPosition, yPosition);
     }
+
+    private void InitializeGoals(LevelData levelData)
+    {
+        int goalsCount = levelData.goals.Length;
+        Vector2 parentSize = goalParent.GetComponent<RectTransform>().sizeDelta;
+        float goalSize;
+        int defaultFontSize = 36;
+
+        // Assuming the parent is a horizontal layout group or similar
+        // Adjust the spacing or layout settings based on the number of goals
+        if (goalsCount == 1)
+        {
+            // If there's only one goal, it should take the full size of the parent
+            goalSize = parentSize.x; // Assuming a square goal for simplicity
+        }
+        else
+        {
+            // If there are two or more goals, they should be half the width of the parent
+            goalSize = parentSize.x / 1.5f;
+        } 
+        
+        for (int i = 0; i < goalsCount; i++)
+        {
+            GameObject goalObject = Instantiate(goalPrefab, goalParent);
+            RectTransform goalRectTransform = goalObject.GetComponent<RectTransform>();
+
+            // Set the size
+            goalRectTransform.sizeDelta = new Vector2(goalSize, goalSize);
+            // Set the image and text size
+            Image goalImage = goalObject.GetComponentInChildren<Image>();
+            goalImage.rectTransform.sizeDelta = new Vector2(goalSize, goalSize);
+            TextMeshProUGUI goalText = goalObject.GetComponentInChildren<TextMeshProUGUI>();
+            goalText.fontSize = (goalsCount == 1 ? defaultFontSize : (defaultFontSize / 2));
+            goalText.rectTransform.sizeDelta = new Vector2(goalSize, goalSize);
+            if (goalsCount >= 2)
+            {
+                goalText.rectTransform.anchoredPosition = new Vector2(15, -20);
+            }
+
+            // If there are two goals, place them side by side
+            if (goalsCount == 2)
+            {
+                goalRectTransform.anchoredPosition = new Vector2((parentSize.x * i / 2) - parentSize.x/4, 0);
+            } // If there are three goals, place 2 side by side and one below, centered
+            else if (goalsCount == 3)
+            {
+                goalRectTransform.anchoredPosition = new Vector2((parentSize.x * i / 2) - parentSize.x / 4, parentSize.y / 6);
+                if (i == 2)
+                {
+                    goalRectTransform.anchoredPosition = new Vector2(0, -parentSize.y / 6);
+                }
+            }
+
+            // Setup the goal display
+            GoalDisplay goalDisplay = goalObject.GetComponent<GoalDisplay>();
+            if (goalDisplay != null)
+            {
+                goalDisplay.SetupGoal(levelData.goals[i]);
+            }
+        }
+    }
+
 
 
 
