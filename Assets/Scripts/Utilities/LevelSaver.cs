@@ -17,20 +17,25 @@ public class LevelSaver : MonoBehaviour
         {
             if (PlayerPrefs.HasKey("level"))
             {
+                if (level < 1)
+                {
+                    ResetLevel();
+                }
                 if (PlayerPrefs.GetInt("level") == level)
                 {
                     return;
-                } else
+                } else 
                 {
                     SaveLevel();
                 }
-            } else if (level != 1)
-            {
-                SaveLevel();
             } else
             {
-                ResetLevel();
-            }
+                if (level < 1)
+                {
+                    ResetLevel();
+                }
+                SaveLevel();
+            } 
         }
         else if (sceneName == "Gameplay")
         {
