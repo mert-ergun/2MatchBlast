@@ -36,6 +36,7 @@ public class ButtonChangeScene : MonoBehaviour
     {
         if (levelSaver.level == 11) return;
         levelSaver.SaveLevel();
+        levelSaver.SetStartedFromMainMenu(true);
         StartCoroutine(ChangeSceneCoroutine(sceneName));
     }
 

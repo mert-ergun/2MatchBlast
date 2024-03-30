@@ -3,6 +3,7 @@ using System.IO;
 using UnityEngine.UI;
 using static Unity.Collections.AllocatorManager;
 using TMPro;
+using UnityEditor.Build.Reporting;
 
 [System.Serializable]
 public class LevelData
@@ -20,6 +21,9 @@ public class LevelInitializer : MonoBehaviour
     public TextMeshProUGUI moveCountText;
     public GameObject blockPrefab; 
     public LevelSaver levelSaver;
+    public GameObject blocks;
+
+    public float step;
 
     private void Start()
     {
@@ -36,8 +40,14 @@ public class LevelInitializer : MonoBehaviour
         string jsonContents = File.ReadAllText(pathToJson);
         LevelData levelData = JsonUtility.FromJson<LevelData>(jsonContents);
 
+        // Get block size
+        Vector2 blockSize = blockPrefab.GetComponent<SpriteRenderer>().size;
+
+        // Calculate step based on block size
+        step = blockSize.x * blockPrefab.transform.localScale.x;
+
         // Stretch grid_background based on grid_width and grid_height
-        Vector2 gridScale = new Vector2(levelData.grid_width, levelData.grid_height);
+        Vector2 gridScale = new Vector2(levelData.grid_width - step / 2, levelData.grid_height - step / 2);
         SpriteRenderer spriteRenderer = gridBackground.GetComponent<SpriteRenderer>();
         spriteRenderer.size = gridScale;
 
@@ -50,6 +60,7 @@ public class LevelInitializer : MonoBehaviour
             // Calculate position based on i, grid_width, and grid_height
             Vector2 position = CalculatePosition(i, levelData.grid_width, levelData.grid_height);
             GameObject block = Instantiate(blockPrefab, position, Quaternion.identity);
+            block.transform.SetParent(blocks.transform);
 
             // Assuming you have a script attached to your blockPrefab that manages the block type
             //block.GetComponent<Block>().SetType(levelData.grid[i]);
@@ -58,14 +69,20 @@ public class LevelInitializer : MonoBehaviour
 
     private Vector2 CalculatePosition(int index, int width, int height)
     {
-        // Calculate the position of the block based on its index
+        // Find the grid background's position, get it's left-bottom corner, first block will be placed there, then move to the right until width is reached, then move up
+        Vector2 gridBackgroundPosition = gridBackground.transform.position;
+        Vector2 gridBackgroundSize = gridBackground.GetComponent<SpriteRenderer>().size;
+        Vector2 gridBackgroundLeftBottomCorner = gridBackgroundPosition - gridBackgroundSize / 4;
+
         int x = index % width;
-        int y = index / width; // integer division
+        int y = index / width;
 
-        // Convert grid position to world position if necessary
-        Vector2 basePosition = new Vector2(-width / 2, -height / 2); // Center the grid
-        Vector2 worldPosition = new Vector2(x, y) + basePosition;
+        Vector2 blockSize = blockPrefab.GetComponent<SpriteRenderer>().size;
 
-        return worldPosition;
+        float xPosition = gridBackgroundLeftBottomCorner.x + x * step + step * 0.66f;
+        float yPosition = gridBackgroundLeftBottomCorner.y + y * step + step * 0.66f;
+
+        return new Vector2(xPosition, yPosition);
     }
+
 }
