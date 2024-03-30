@@ -15,11 +15,21 @@ public class LevelData
     public string[] grid;
 }
 
+[System.Serializable]
+public class LevelGoal
+{
+    public string type;
+    public int count;
+}
+
 public class LevelInitializer : MonoBehaviour
 {
     public GameObject gridBackground;
     public TextMeshProUGUI moveCountText;
-    public GameObject blockPrefab; 
+    public GameObject blockPrefab;
+    public GameObject cubePrefab;
+    public GameObject obstaclePrefab;
+    public GameObject tntPrefab;
     public LevelSaver levelSaver;
     public GameObject blocks;
 
@@ -37,6 +47,7 @@ public class LevelInitializer : MonoBehaviour
 
     private void InitializeLevel(string pathToJson)
     {
+        // Read JSON file
         string jsonContents = File.ReadAllText(pathToJson);
         LevelData levelData = JsonUtility.FromJson<LevelData>(jsonContents);
 
@@ -59,11 +70,29 @@ public class LevelInitializer : MonoBehaviour
         {
             // Calculate position based on i, grid_width, and grid_height
             Vector2 position = CalculatePosition(i, levelData.grid_width, levelData.grid_height);
-            GameObject block = Instantiate(blockPrefab, position, Quaternion.identity);
-            block.transform.SetParent(blocks.transform);
+            
+            string blockType = levelData.grid[i];
+            GameObject blockObject;
 
-            // Assuming you have a script attached to your blockPrefab that manages the block type
-            //block.GetComponent<Block>().SetType(levelData.grid[i]);
+            // Create block based on blockType
+            if (blockType == "r" || blockType == "g" || blockType == "b" || blockType == "y" || blockType == "rand")
+            {
+                blockObject = Instantiate(cubePrefab, position, Quaternion.identity);
+                blockObject.transform.parent = blocks.transform;
+                blockObject.GetComponent<Cube>().SetType(blockType);
+            } else if (blockType == "t")
+            {
+                blockObject = Instantiate(tntPrefab, position, Quaternion.identity);
+                blockObject.transform.parent = blocks.transform;
+                blockObject.GetComponent<TNT>().SetType(blockType);
+            } else
+            {
+                blockObject = Instantiate(obstaclePrefab, position, Quaternion.identity);
+                blockObject.transform.parent = blocks.transform;
+                blockObject.GetComponent<Obstacle>().SetType(blockType);
+            }
+            // Set order in layer
+            blockObject.GetComponent<SpriteRenderer>().sortingOrder = i;
         }
     }
 
@@ -84,5 +113,7 @@ public class LevelInitializer : MonoBehaviour
 
         return new Vector2(xPosition, yPosition);
     }
+
+
 
 }

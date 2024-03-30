@@ -211,7 +211,7 @@ SpriteRenderer:
   m_LightmapParameters: {fileID: 0}
   m_SortingLayerID: 0
   m_SortingLayer: 0
-  m_SortingOrder: 0
+  m_SortingOrder: -1
   m_Sprite: {fileID: 1817671579, guid: b8894c6046e543e4fa993e94d01762fe, type: 3}
   m_Color: {r: 1, g: 1, b: 1, a: 1}
   m_FlipX: 0
@@ -606,7 +606,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 37fd9c22d1347334f8751a36af7daec0, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  level: 7
+  level: 5
 --- !u!4 &951862667
 Transform:
   m_ObjectHideFlags: 0
@@ -867,6 +867,9 @@ MonoBehaviour:
   gridBackground: {fileID: 224849027}
   moveCountText: {fileID: 1657170326}
   blockPrefab: {fileID: 7534274062274901531, guid: b46a4ac35e7cc8644b281d9d3a614f74, type: 3}
+  cubePrefab: {fileID: 409020434335357630, guid: 14e84a67866549544a799ad6b40e3f8d, type: 3}
+  obstaclePrefab: {fileID: 5661609630082107660, guid: 996dd0f5af8bad24a9fd84c2dc2db10d, type: 3}
+  tntPrefab: {fileID: 1088841815965467358, guid: cafbced6522fa4845856deef50f0f28a, type: 3}
   levelSaver: {fileID: 951862666}
   blocks: {fileID: 213275688}
   step: 0
@@ -1078,7 +1081,7 @@ SpriteRenderer:
   m_LightmapParameters: {fileID: 0}
   m_SortingLayerID: 0
   m_SortingLayer: 0
-  m_SortingOrder: -1
+  m_SortingOrder: -2
   m_Sprite: {fileID: 21300000, guid: 622f298dd273d5047aa04954bfe9a4f8, type: 3}
   m_Color: {r: 1, g: 1, b: 1, a: 1}
   m_FlipX: 0
