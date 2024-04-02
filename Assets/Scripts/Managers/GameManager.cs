@@ -27,9 +27,9 @@ public class GameManager : Singleton<GameManager>
     public void FallBlock()
     {
         // Fall all the blocks until they reach above another block
-        for (int x = 0; x < GridManager.Instance.GetRow(); x++)
+        for (int x = GridManager.Instance.GetRow()-1; x >= 0; x--)
         {
-            for (int y = 0; y < GridManager.Instance.GetColumn(); y++)
+            for (int y = GridManager.Instance.GetColumn()-1; y >= 0; y--)
             {
                 Block block = GridManager.Instance.GetBlock(x, y);
                 if (block != null)
@@ -50,6 +50,7 @@ public class GameManager : Singleton<GameManager>
                     if (fallDistance > 0)
                     {
                         block.Fall(fallDistance);
+
                         GridManager.Instance.SetBlock(x, y, null);
                         GridManager.Instance.SetBlock(x + fallDistance, y, block);
                         block.SetX(x + fallDistance);

@@ -98,3 +98,4 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   type: 0
+  particlePrefab: {fileID: 1826152233314115377, guid: a9e76cd9081cc8149877fb53c978157f, type: 3}

@@ -36,42 +36,106 @@ public class GridManager : Singleton<GridManager>
     {
         for (int x = 0; x < row; x++)
         {
-            string row = "";
+            string rowString = "";
             for (int y = 0; y < column; y++)
             {
-                row += grid[x, y].GetType() == typeof(Cube) ? grid[x, y].GetComponent<Cube>().color.ToString() : grid[x, y].GetType().ToString() + " ";
+                rowString += grid[x, y] == null ? "0" : "1";
             }
-            Debug.Log(row);
+            Debug.Log(rowString);
         }
     }
 
     public void HandleBlockTap(Block block)
     {
         List<Block> connectedBlocks = FindConnectedBlocks(block);
+
+        if (connectedBlocks.Count == 1)
+        {
+            // Play jiggle animation
+            block.GetComponent<Animator>().SetTrigger("Jiggle");
+            return;
+        }
+
         if (connectedBlocks.Count >= 2)
         {
             GameManager.Instance.UseMove();
+            // Reverse the order of the blocks to destroy the bottom blocks first
+            connectedBlocks.Reverse();
             foreach (Block connectedBlock in connectedBlocks)
             {
+                // Play the destroy animation
+                connectedBlock.Explode();
                 ObjectPool.Instance.ReturnToPool(connectedBlock.type.ToString(), connectedBlock.gameObject);
                 // Remove the block from the grid
-                grid[connectedBlock.GetX(), connectedBlock.GetY()] = null;
+                grid[connectedBlock.GetX(), connectedBlock.GetY()] = null;   
+            }
 
-                while(CheckForFallingBlocks())
-                {
-                    GameManager.Instance.FallBlock();
-                }
+            
+            GameManager.Instance.FallBlock();
 
+            foreach(Block connectedBlock in connectedBlocks)
+            {
                 // Spawn a new block at the top
-                Block newBlock = ObjectPool.Instance.SpawnFromPool("Cube", new Vector3(connectedBlock.GetComponent<Transform>().position.x, topY), Quaternion.identity).GetComponent<Block>();
+                Block newBlock = ObjectPool.Instance.SpawnFromPool("Cube", new Vector3(connectedBlock.GetComponent<Transform>().position.x, topY + 1.42f * 0.33f), Quaternion.identity).GetComponent<Block>();
                 SetBlock(0, connectedBlock.GetY(), newBlock);
                 newBlock.SetX(0);
                 newBlock.SetY(connectedBlock.GetY());
-                newBlock.GetComponent<SpriteRenderer>().sortingOrder = (row - newBlock.GetX() -1) * column + newBlock.GetY();
+                newBlock.GetComponent<SpriteRenderer>().sortingOrder = (row - newBlock.GetX() - 1) * column + newBlock.GetY();
+
                 Cube cube = (Cube)newBlock;
                 cube.SetType("rand");
-                
+
+                if (checkBlockCanFall(newBlock))
+                {
+                    FallBlock(newBlock);
+                }
+                else
+                {
+                     newBlock.Fall(1);
+                }
+
             }
+
+            
+        }
+    }
+
+    private bool checkBlockCanFall(Block block)
+    {
+        if (block.GetX() < row - 1)
+        {
+            if (grid[block.GetX() + 1, block.GetY()] == null)
+            {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    private void FallBlock(Block block)
+    {
+        int fallDistance = 0;
+        for (int i = block.GetX() + 1; i < row; i++)
+        {
+            if (grid[i, block.GetY()] == null)
+            {
+                fallDistance++;
+            }
+            else
+            {
+                break;
+            }
+        }
+
+        if (fallDistance > 0)
+        {
+            block.Fall(fallDistance + 1);
+
+            grid[block.GetX(), block.GetY()] = null;
+            grid[block.GetX() + fallDistance, block.GetY()] = block;
+            block.SetX(block.GetX() + fallDistance);
+            // Set the sorting order
+            block.GetComponent<SpriteRenderer>().sortingOrder -= fallDistance * column;
         }
     }
 

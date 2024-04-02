@@ -1,3 +1,5 @@
+using System.Collections;
+using System.Collections.Generic;
 using UnityEngine;
 
 public class Block : MonoBehaviour
@@ -12,6 +14,8 @@ public class Block : MonoBehaviour
     public BlockType type;
     private int x;
     private int y;
+    [SerializeField]
+    public GameObject particlePrefab;
 
     // When clicked, activate the block
     protected virtual void OnMouseDown()
@@ -37,9 +41,82 @@ public class Block : MonoBehaviour
 
     public void Fall(int fallDistance)
     {
-        Transform transform = gameObject.transform;
-        transform.position = new Vector3(transform.position.x, transform.position.y - ((1.42f * 0.33f) * fallDistance), transform.position.z);
+        StartCoroutine(FallCoroutine(fallDistance));
     }
+
+    public System.Collections.IEnumerator FallCoroutine(int fallDistance)
+    {
+        float fallSpeed = 3.0f; // Units per second
+        float distance = Mathf.Abs((1.42f * 0.33f) * fallDistance); // Calculate the absolute fall distance
+        float duration = distance / fallSpeed; // Total duration based on speed and distance
+
+        float bounceHeight = 0.05f; // Height of the bounce above the end position
+
+        Vector3 startPos = transform.position;
+        Vector3 endPos = new Vector3(transform.position.x, transform.position.y - distance, transform.position.z);
+        Vector3 bouncePos = new Vector3(endPos.x, endPos.y + bounceHeight, endPos.z); // Position slightly above the end position for bounce
+
+        // Move to end position
+        float time = 0;
+        while (time < duration)
+        {
+            transform.position = Vector3.Lerp(startPos, endPos, time / duration);
+            time += Time.deltaTime;
+            yield return null;
+        }
+        transform.position = endPos; // Ensure the block is exactly at the end position
+
+        float bounceDuration = 0.2f; // Fixed duration for the bounce effect
+
+        // Bounce up to bounce position
+        time = 0;
+        while (time < bounceDuration)
+        {
+            transform.position = Vector3.Lerp(endPos, bouncePos, time / bounceDuration);
+            time += Time.deltaTime;
+            yield return null;
+        }
+
+        // Settle back to end position
+        time = 0;
+        while (time < bounceDuration)
+        {
+            transform.position = Vector3.Lerp(bouncePos, endPos, time / bounceDuration);
+            time += Time.deltaTime;
+            yield return null;
+        }
+
+        transform.position = endPos; // Ensure the block ends up exactly at the end position
+    }
+
+    public void Explode()
+    {
+        // Instantiate some particles
+        int numParticles = 3; // Number of particles to instantiate
+        for (int i = 0; i < numParticles; i++)
+        {
+            GameObject particle = Instantiate(particlePrefab, transform.position, Quaternion.identity);
+            particle.GetComponent<SpriteRenderer>().sortingOrder = 101; // Ensure particles are rendered above everything else
+            if (type == BlockType.Cube) // Set the particle color based on the block color
+            {
+                Cube cube = (Cube)this;
+                particle.GetComponent<Particle>().SetColor(cube.color.ToString());
+            }
+            else
+            {
+                particle.GetComponent<Particle>().SetColor("Yellow");
+            }
+
+            // Apply a random force to each particle
+            Rigidbody2D rb = particle.GetComponent<Rigidbody2D>();
+            Vector2 force = new Vector2(Random.Range(-1f, 1f), Random.Range(-1f, 1f)).normalized * Random.Range(1f, 5f);
+            rb.AddForce(force, ForceMode2D.Impulse);
+        }
+    }
+
+
+
+
 
     public void SetX(int x)
     {
