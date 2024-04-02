@@ -72,7 +72,7 @@ public class GridManager : Singleton<GridManager>
             
             GameManager.Instance.FallBlock();
 
-            yield return new WaitForSeconds(0.05f);
+            yield return new WaitForSeconds(0.2f);
 
             foreach (Block connectedBlock in connectedBlocks)
             {
@@ -89,12 +89,12 @@ public class GridManager : Singleton<GridManager>
                 if (checkBlockCanFall(newBlock))
                 {
                     FallBlock(newBlock);
+                    yield return new WaitForSeconds(0.15f);
                 }
                 else
                 {
                      newBlock.Fall(1);
                 }
-                yield return new WaitForSeconds(0.05f);
             }
         }
     }

@@ -105,9 +105,14 @@ public class Block : MonoBehaviour
                 Cube cube = (Cube)this;
                 particle.GetComponent<Particle>().SetColor(cube.color.ToString());
             }
-            else
+            else if (type == BlockType.Obstacle)
             {
-                particle.GetComponent<Particle>().SetColor("Yellow");
+                Obstacle obstacle = (Obstacle)this;
+                particle.GetComponent<Particle>().SetColor(obstacle.type.ToString());
+            }
+            else if (type == BlockType.TNT)
+            {
+                particle.GetComponent<Particle>().SetColor("TNT");
             }
 
             // Apply a random force to each particle
