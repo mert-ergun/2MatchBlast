@@ -45,7 +45,7 @@ public class GridManager : Singleton<GridManager>
         }
     }
 
-    public void HandleBlockTap(Block block)
+    public IEnumerator HandleBlockTap(Block block)
     {
         List<Block> connectedBlocks = FindConnectedBlocks(block);
 
@@ -53,10 +53,9 @@ public class GridManager : Singleton<GridManager>
         {
             // Play jiggle animation
             block.GetComponent<Animator>().SetTrigger("Jiggle");
-            return;
         }
 
-        if (connectedBlocks.Count >= 2)
+        else if (connectedBlocks.Count >= 2)
         {
             GameManager.Instance.UseMove();
             // Reverse the order of the blocks to destroy the bottom blocks first
@@ -73,7 +72,9 @@ public class GridManager : Singleton<GridManager>
             
             GameManager.Instance.FallBlock();
 
-            foreach(Block connectedBlock in connectedBlocks)
+            yield return new WaitForSeconds(0.05f);
+
+            foreach (Block connectedBlock in connectedBlocks)
             {
                 // Spawn a new block at the top
                 Block newBlock = ObjectPool.Instance.SpawnFromPool("Cube", new Vector3(connectedBlock.GetComponent<Transform>().position.x, topY + 1.42f * 0.33f), Quaternion.identity).GetComponent<Block>();
@@ -93,10 +94,8 @@ public class GridManager : Singleton<GridManager>
                 {
                      newBlock.Fall(1);
                 }
-
+                yield return new WaitForSeconds(0.05f);
             }
-
-            
         }
     }
 

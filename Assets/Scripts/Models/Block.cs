@@ -96,6 +96,9 @@ public class Block : MonoBehaviour
         for (int i = 0; i < numParticles; i++)
         {
             GameObject particle = Instantiate(particlePrefab, transform.position, Quaternion.identity);
+            // Rotate the particle to a random angle
+            particle.transform.Rotate(new Vector3(0, 0, Random.Range(0, 360)));
+
             particle.GetComponent<SpriteRenderer>().sortingOrder = 101; // Ensure particles are rendered above everything else
             if (type == BlockType.Cube) // Set the particle color based on the block color
             {
@@ -113,10 +116,6 @@ public class Block : MonoBehaviour
             rb.AddForce(force, ForceMode2D.Impulse);
         }
     }
-
-
-
-
 
     public void SetX(int x)
     {

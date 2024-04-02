@@ -13,7 +13,7 @@ public class GameManager : Singleton<GameManager>
         {
             return;
         }
-        GridManager.Instance.HandleBlockTap(block);
+        StartCoroutine(GridManager.Instance.HandleBlockTap(block));
        
 
     }
