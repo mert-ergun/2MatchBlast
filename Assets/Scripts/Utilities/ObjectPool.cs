@@ -1,16 +1,30 @@
 using System.Collections.Generic;
-using System.Linq;
 using UnityEngine;
 
 public class ObjectPool : Singleton<ObjectPool>
 {
     public List<Pool> pools = new List<Pool>();
     private Dictionary<string, Queue<GameObject>> poolDictionary = new Dictionary<string, Queue<GameObject>>();
+    Transform blocks;
+
+    public GameObject cubePrefab;
+    public GameObject tntPrefab;
+
+    private CubeFactory cubeFactory;
 
     protected override void Awake()
     {
         base.Awake();
+        pools = new List<Pool>
+        {
+            new Pool { tag = "Cube", prefab = cubePrefab, size = 0 },
+            new Pool { tag = "TNT", prefab = tntPrefab, size = 10 }
+        };
+
+
         PopulatePools();
+        blocks = GameObject.Find("Blocks").transform;
+        cubeFactory = GameObject.Find("BlockFactory").GetComponent<CubeFactory>();
     }
 
     private void PopulatePools()
@@ -42,12 +56,14 @@ public class ObjectPool : Singleton<ObjectPool>
         if (poolDictionary[tag].Count == 0)
         {
             Debug.LogError($"Pool with tag: {tag} is empty!");
-            return null;
+            
+            cubeFactory.CreateBlock("rand", position);
         }
 
         var objToSpawn = poolDictionary[tag].Dequeue();
         objToSpawn.transform.position = position;
         objToSpawn.transform.rotation = rotation;
+        objToSpawn.transform.SetParent(objToSpawn.GetComponent<RectTransform>() != null ? null : blocks);
         objToSpawn.SetActive(true);
 
         return objToSpawn;
@@ -62,6 +78,7 @@ public class ObjectPool : Singleton<ObjectPool>
         }
 
         objectToReturn.SetActive(false);
+        objectToReturn.transform.SetParent(objectToReturn.GetComponent<RectTransform>() != null ? null : transform);
         poolDictionary[tag].Enqueue(objectToReturn);
     }
 

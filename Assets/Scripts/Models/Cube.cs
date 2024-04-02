@@ -1,4 +1,3 @@
-using System.Drawing;
 using UnityEngine;
 
 public class Cube : Block
@@ -40,24 +39,20 @@ public class Cube : Block
     {
         base.OnMouseDown();
         // Cube click/tap handling logic
-        Debug.Log($"Cube tapped, color: {color}, type: {cubeType}");
     }
 
     public override void ActivateBlock()
     {
         base.ActivateBlock();
         // Additional activation logic for Cubes
+
+        GameManager.Instance.HandleBlockTap(this);
     }
 
     public override void DeactivateBlock()
     {
         base.DeactivateBlock();
         // Additional deactivation logic for Cubes
-    }
-
-    public void MatchCube()
-    {
-        // Logic to handle cube matching
     }
 
     private void UpdateCubeAppearance()
@@ -110,6 +105,12 @@ public class Cube : Block
                 break;
         }
 
+        UpdateCubeAppearance();
+    }
+
+    public void SetTNT()
+    {
+        cubeType = CubeType.TNT;
         UpdateCubeAppearance();
     }
 

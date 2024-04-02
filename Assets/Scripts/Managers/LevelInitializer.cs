@@ -71,6 +71,13 @@ public class LevelInitializer : MonoBehaviour
         // Update move_count text
         moveCountText.text = levelData.move_count.ToString();
 
+        // Initialize grid as a 2D array of Blocks
+        Block[][] grid = new Block[levelData.grid_height][];
+        for (int i = 0; i < levelData.grid_height; i++)
+        {
+            grid[i] = new Block[levelData.grid_width];
+        }
+
         // Place blocks
         for (int i = 0; i < levelData.grid.Length; i++)
         {
@@ -86,16 +93,20 @@ public class LevelInitializer : MonoBehaviour
                 blockObject = Instantiate(cubePrefab, position, Quaternion.identity);
                 blockObject.transform.parent = blocks.transform;
                 blockObject.GetComponent<Cube>().SetType(blockType);
+                grid[levelData.grid_height - (i / levelData.grid_width) - 1][i % levelData.grid_width] = blockObject.GetComponent<Cube>();
+
             } else if (blockType == "t")
             {
                 blockObject = Instantiate(tntPrefab, position, Quaternion.identity);
                 blockObject.transform.parent = blocks.transform;
                 blockObject.GetComponent<TNT>().SetType(blockType);
+                grid[i % levelData.grid_width][i / levelData.grid_width] = blockObject.GetComponent<TNT>();
             } else
             {
                 blockObject = Instantiate(obstaclePrefab, position, Quaternion.identity);
                 blockObject.transform.parent = blocks.transform;
                 blockObject.GetComponent<Obstacle>().SetType(blockType);
+                grid[levelData.grid_height - (i / levelData.grid_width) - 1][i % levelData.grid_width] = blockObject.GetComponent<Obstacle>();
 
                 // If this type of block is not already in the list of obstacles, add it, otherwise increment the count
                 if (!levelData.goals.Any(goal => goal.type == blockType))
@@ -114,6 +125,7 @@ public class LevelInitializer : MonoBehaviour
             blockObject.GetComponent<SpriteRenderer>().sortingOrder = i;
         }
 
+        GridManager.Instance.InitializeGrid(grid);
         InitializeGoals(levelData);
     }
 

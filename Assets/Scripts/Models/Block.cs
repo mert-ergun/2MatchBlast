@@ -1,5 +1,4 @@
 using UnityEngine;
-using UnityEngine.UIElements;
 
 public class Block : MonoBehaviour
 {
@@ -7,9 +6,12 @@ public class Block : MonoBehaviour
     {
         Cube,
         Obstacle,
+        TNT
     }
 
     public BlockType type;
+    private int x;
+    private int y;
 
     // When clicked, activate the block
     protected virtual void OnMouseDown()
@@ -19,8 +21,8 @@ public class Block : MonoBehaviour
 
     // Common functionality that might be overridden in derived classes
     public virtual void ActivateBlock()
-    {
-        // General activation logic
+    { 
+        
     }
 
     public virtual void DeactivateBlock()
@@ -33,4 +35,29 @@ public class Block : MonoBehaviour
         // Basic implementation; specific types will override this
     }
 
+    public void Fall(int fallDistance)
+    {
+        Transform transform = gameObject.transform;
+        transform.position = new Vector3(transform.position.x, transform.position.y - ((1.42f * 0.33f) * fallDistance), transform.position.z);
+    }
+
+    public void SetX(int x)
+    {
+        this.x = x;
+    }
+
+    public void SetY(int y)
+    {
+        this.y = y;
+    }
+
+    public int GetX()
+    {
+        return x;
+    }
+
+    public int GetY()
+    {
+        return y;
+    }
 }

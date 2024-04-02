@@ -13,7 +13,7 @@ public class LevelSaver : MonoBehaviour
         string sceneName = SceneManager.GetActiveScene().name;
 
         // If scene name is MainMenu
-        if (sceneName == "MainMenu")
+        if (sceneName == "MainScene")
         {
             if (PlayerPrefs.HasKey("level"))
             {
@@ -37,7 +37,7 @@ public class LevelSaver : MonoBehaviour
                 SaveLevel();
             } 
         }
-        else if (sceneName == "Gameplay")
+        else if (sceneName == "LevelScene")
         {
             if (IsStartedFromMainMenu())
             {

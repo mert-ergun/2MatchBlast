@@ -1,5 +1,3 @@
-using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
 
 public class TNT : Block
@@ -32,5 +30,13 @@ public class TNT : Block
         }
 
         spriteRenderer.sprite = tntSprite;
+    }
+
+    public override void SetType(string blockType)
+    {
+        if (blockType == "t")
+        {
+            type = BlockType.TNT;
+        }
     }
 }
