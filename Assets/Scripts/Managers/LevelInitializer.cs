@@ -106,7 +106,7 @@ public class LevelInitializer : MonoBehaviour
                 blockObject = Instantiate(tntPrefab, position, Quaternion.identity);
                 blockObject.transform.parent = blocks.transform;
                 blockObject.GetComponent<TNT>().SetType(blockType);
-                grid[i % levelData.grid_width][i / levelData.grid_width] = blockObject.GetComponent<TNT>();
+                grid[levelData.grid_height - (i / levelData.grid_width) - 1][i % levelData.grid_width] = blockObject.GetComponent<TNT>();
             } else
             {
                 blockObject = Instantiate(obstaclePrefab, position, Quaternion.identity);

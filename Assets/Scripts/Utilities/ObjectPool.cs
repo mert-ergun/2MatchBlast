@@ -9,6 +9,7 @@ public class ObjectPool : Singleton<ObjectPool>
 
     public GameObject cubePrefab;
     public GameObject tntPrefab;
+    public GameObject particlePrefab;
 
     private CubeFactory cubeFactory;
 
@@ -18,7 +19,8 @@ public class ObjectPool : Singleton<ObjectPool>
         pools = new List<Pool>
         {
             new Pool { tag = "Cube", prefab = cubePrefab, size = 0 },
-            new Pool { tag = "TNT", prefab = tntPrefab, size = 10 }
+            new Pool { tag = "TNT", prefab = tntPrefab, size = 10 },
+            new Pool { tag = "Particle", prefab = particlePrefab, size = 40}
         };
 
 
@@ -57,7 +59,13 @@ public class ObjectPool : Singleton<ObjectPool>
         {
             Debug.LogError($"Pool with tag: {tag} is empty!");
             
-            cubeFactory.CreateBlock("rand", position);
+            if (tag == "Cube")
+            {
+                cubeFactory.CreateBlock("rand", position);
+            } else if (tag == "Particle")
+            {
+                Instantiate(particlePrefab, position, rotation);
+            }
         }
 
         var objToSpawn = poolDictionary[tag].Dequeue();

@@ -21,9 +21,10 @@ public class Particle : MonoBehaviour
     public Sprite stone2;
     public Sprite stone3;
 
-    void Start()
+    public IEnumerator ReturnToPool()
     {
-        Destroy(gameObject, lifetime);
+        yield return new WaitForSeconds(lifetime);
+        ObjectPool.Instance.ReturnToPool("Particle", gameObject);
     }
 
     public void SetColor(string color)

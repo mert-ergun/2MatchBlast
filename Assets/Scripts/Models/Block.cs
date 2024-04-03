@@ -95,7 +95,7 @@ public class Block : MonoBehaviour
         int numParticles = 3; // Number of particles to instantiate
         for (int i = 0; i < numParticles; i++)
         {
-            GameObject particle = Instantiate(particlePrefab, transform.position, Quaternion.identity);
+            GameObject particle = ObjectPool.Instance.SpawnFromPool("Particle", transform.position, Quaternion.identity);
             // Rotate the particle to a random angle
             particle.transform.Rotate(new Vector3(0, 0, Random.Range(0, 360)));
 
@@ -119,6 +119,7 @@ public class Block : MonoBehaviour
             Rigidbody2D rb = particle.GetComponent<Rigidbody2D>();
             Vector2 force = new Vector2(Random.Range(-1f, 1f), Random.Range(-1f, 1f)).normalized * Random.Range(1f, 5f);
             rb.AddForce(force, ForceMode2D.Impulse);
+            particle.GetComponent<Particle>().StartCoroutine(particle.GetComponent<Particle>().ReturnToPool());
         }
     }
 

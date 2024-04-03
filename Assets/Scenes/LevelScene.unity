@@ -646,7 +646,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 37fd9c22d1347334f8751a36af7daec0, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  level: 4
+  level: 1
 --- !u!4 &951862667
 Transform:
   m_ObjectHideFlags: 0
@@ -1231,6 +1231,7 @@ MonoBehaviour:
   pools: []
   cubePrefab: {fileID: 409020434335357630, guid: 14e84a67866549544a799ad6b40e3f8d, type: 3}
   tntPrefab: {fileID: 1088841815965467358, guid: cafbced6522fa4845856deef50f0f28a, type: 3}
+  particlePrefab: {fileID: 1826152233314115377, guid: a9e76cd9081cc8149877fb53c978157f, type: 3}
 --- !u!1 &1675738568
 GameObject:
   m_ObjectHideFlags: 0
