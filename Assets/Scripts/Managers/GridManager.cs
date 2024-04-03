@@ -78,21 +78,32 @@ public class GridManager : Singleton<GridManager>
                 allObstacles.AddRange(obstacles);
                 foreach (Block obstacle in obstacles)
                 {
-                    obstacle.Explode();
-                    grid[obstacle.GetX(), obstacle.GetY()] = null;
-                    obstacle.gameObject.SetActive(false);
+                    Obstacle obstacle1 = (Obstacle)obstacle;
+                    if (obstacle1.obstacleType == Obstacle.ObstacleType.Vase && obstacle1.GetComponent<SpriteRenderer>().sprite == obstacle1.vaseSprite1)
+                    {
+                        allObstacles.Remove(obstacle);
+                    } else if (obstacle1.obstacleType == Obstacle.ObstacleType.Stone)
+                    {
+                        allObstacles.Remove(obstacle);
+                    }
+                    if (obstacle1.isExploded)
+                    {
+                        allObstacles.Remove(obstacle);
+                        continue;
+                    }
+                    obstacle1.Explode();
+                    obstacle1.isExploded = true;
                 }
 
                 ObjectPool.Instance.ReturnToPool(connectedBlock.type.ToString(), connectedBlock.gameObject);
-                // Remove the block from the grid
-                grid[connectedBlock.GetX(), connectedBlock.GetY()] = null;
                 GameManager.Instance.UpdateGoals();
             }
+
+            ClearIsExploded();
 
             // Add connected obstacles to the connected blocks list to create new blocks instead of obstacles
             connectedBlocks.AddRange(allObstacles);
 
-            
             GameManager.Instance.FallBlock();
 
             yield return new WaitForSeconds(0.2f);
@@ -121,6 +132,21 @@ public class GridManager : Singleton<GridManager>
             }
             yield return new WaitForSeconds(0.05f * connectedBlocks.Count);
             GameManager.Instance.StopFalling();
+        }
+    }
+
+    private void ClearIsExploded()
+    {
+        for (int x = 0; x < row; x++)
+        {
+            for (int y = 0; y < column; y++)
+            {
+                if (grid[x, y] != null && grid[x, y].type == Block.BlockType.Obstacle)
+                {
+                    Obstacle obstacle = (Obstacle)grid[x, y];
+                    obstacle.isExploded = false;
+                }
+            }
         }
     }
 
@@ -195,6 +221,10 @@ public class GridManager : Singleton<GridManager>
         while (blocksToCheck.Count > 0)
         {
             Block currentBlock = blocksToCheck.Dequeue();
+            if (currentBlock == null)
+            {
+                continue;
+            }
             if (currentBlock.type != Block.BlockType.Cube)
             {
                 continue;
@@ -206,6 +236,10 @@ public class GridManager : Singleton<GridManager>
             List<Block> neighbors = GetNeighbors(currentBlock);
             foreach (Block neighbor in neighbors)
             {
+                if (neighbor == null)
+                {
+                    continue;
+                }
                 if (neighbor.type != Block.BlockType.Cube)
                 {
                     continue;

@@ -44,6 +44,14 @@ public class GameManager : Singleton<GameManager>
                 Block block = GridManager.Instance.GetBlock(x, y);
                 if (block != null)
                 {
+                    if (block.type == Block.BlockType.Obstacle)
+                    {
+                        Obstacle obstacle = (Obstacle)block;
+                        if (obstacle.obstacleType != Obstacle.ObstacleType.Vase)
+                        {
+                            continue;
+                        }
+                    }
                     int fallDistance = 0;
                     for (int i = x + 1; i < GridManager.Instance.GetRow(); i++)
                     {

@@ -4,7 +4,7 @@ using UnityEngine;
 
 public class Particle : MonoBehaviour
 {
-    public float lifetime = 1.0f;
+    public float lifetime = 2.0f;
 
     public Sprite red;
     public Sprite green;

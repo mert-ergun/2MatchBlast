@@ -16,6 +16,8 @@ public class Obstacle : Block
     public Sprite vaseSprite2;
     public Sprite boxSprite;
 
+    public bool isExploded = false;
+
 
     void Start()
     {
@@ -89,9 +91,29 @@ public class Obstacle : Block
         // Additional deactivation logic for Obstacles
     }
 
-    // Additional methods specific to Obstacle behavior
-    public void MoveObstacle()
+    public override void Explode()
     {
-        // Logic to move the obstacle, if applicable
+        switch (obstacleType)
+        {
+            case ObstacleType.Stone:
+                Debug.Log("Stone obstacle cannot be exploded.");
+                return;
+            case ObstacleType.Vase:
+                Sprite sprite = GetComponent<SpriteRenderer>().sprite;
+                if (sprite == vaseSprite1)
+                {
+                    GetComponent<SpriteRenderer>().sprite = vaseSprite2;
+                }
+                else
+                {
+                    this.gameObject.SetActive(false);
+                    base.Explode();
+                }
+                break;
+            case ObstacleType.Box:
+                this.gameObject.SetActive(false);
+                base.Explode();
+                break;
+        }
     }
 }

@@ -89,7 +89,7 @@ public class Block : MonoBehaviour
         transform.position = endPos; // Ensure the block ends up exactly at the end position
     }
 
-    public void Explode()
+    public virtual void Explode()
     {
         // Instantiate some particles
         int numParticles = 3; // Number of particles to instantiate
@@ -98,6 +98,10 @@ public class Block : MonoBehaviour
             GameObject particle = ObjectPool.Instance.SpawnFromPool("Particle", transform.position, Quaternion.identity);
             // Rotate the particle to a random angle
             particle.transform.Rotate(new Vector3(0, 0, Random.Range(0, 360)));
+
+            // Scale the particle to a random size
+            float scale = Random.Range(0.05f, 0.15f);
+            particle.transform.localScale = new Vector3(scale, scale, 0);
 
             particle.GetComponent<SpriteRenderer>().sortingOrder = 101; // Ensure particles are rendered above everything else
             if (type == BlockType.Cube) // Set the particle color based on the block color
@@ -121,6 +125,7 @@ public class Block : MonoBehaviour
             rb.AddForce(force, ForceMode2D.Impulse);
             particle.GetComponent<Particle>().StartCoroutine(particle.GetComponent<Particle>().ReturnToPool());
         }
+        GridManager.Instance.SetBlock(x, y, null);
     }
 
     public void SetX(int x)
