@@ -58,18 +58,34 @@ public class GridManager : Singleton<GridManager>
 
         else if (connectedBlocks.Count >= 2)
         {
+            block.GetComponent<Animator>().SetTrigger("Clicked");
+            yield return new WaitForSeconds(0.2f);
             GameManager.Instance.StartFalling();
             GameManager.Instance.UseMove();
             // Reverse the order of the blocks to destroy the bottom blocks first
             connectedBlocks.Reverse();
+            List<Block> allObstacles = new List<Block>();
             foreach (Block connectedBlock in connectedBlocks)
             {
                 // Play the destroy animation
                 connectedBlock.Explode();
+                
+                List<Block> obstacles = FindConnectedObstacles(connectedBlock);
+                allObstacles.AddRange(obstacles);
+                foreach (Block obstacle in obstacles)
+                {
+                    obstacle.Explode();
+                    grid[obstacle.GetX(), obstacle.GetY()] = null;
+                    obstacle.gameObject.SetActive(false);
+                }
+
                 ObjectPool.Instance.ReturnToPool(connectedBlock.type.ToString(), connectedBlock.gameObject);
                 // Remove the block from the grid
                 grid[connectedBlock.GetX(), connectedBlock.GetY()] = null;   
             }
+
+            // Add connected obstacles to the connected blocks list to create new blocks instead of obstacles
+            connectedBlocks.AddRange(allObstacles);
 
             
             GameManager.Instance.FallBlock();
@@ -140,6 +156,26 @@ public class GridManager : Singleton<GridManager>
             // Set the sorting order
             block.GetComponent<SpriteRenderer>().sortingOrder -= fallDistance * column;
         }
+    }
+
+    private List<Block> FindConnectedObstacles(Block block)
+    {
+        List<Block> neighbors = GetNeighbors(block);
+
+        List<Block> connectedObstacles = new List<Block>();
+
+        foreach (Block neighbor in neighbors)
+        {
+            if (neighbor != null)
+            {
+                if (neighbor.type == Block.BlockType.Obstacle)
+                {
+                    connectedObstacles.Add(neighbor);
+                }
+            }
+        }
+
+        return connectedObstacles;
     }
 
     private List<Block> FindConnectedBlocks(Block block)

@@ -18,7 +18,7 @@ public class ObjectPool : Singleton<ObjectPool>
         base.Awake();
         pools = new List<Pool>
         {
-            new Pool { tag = "Cube", prefab = cubePrefab, size = 0 },
+            new Pool { tag = "Cube", prefab = cubePrefab, size = 30 },
             new Pool { tag = "TNT", prefab = tntPrefab, size = 10 },
             new Pool { tag = "Particle", prefab = particlePrefab, size = 40}
         };
@@ -61,10 +61,10 @@ public class ObjectPool : Singleton<ObjectPool>
             
             if (tag == "Cube")
             {
-                cubeFactory.CreateBlock("rand", position);
+                return cubeFactory.CreateBlock("rand", position).GetComponent<GameObject>();
             } else if (tag == "Particle")
             {
-                Instantiate(particlePrefab, position, rotation);
+                return Instantiate(particlePrefab, position, rotation);
             }
         }
 

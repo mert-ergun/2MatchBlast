@@ -108,7 +108,7 @@ public class Block : MonoBehaviour
             else if (type == BlockType.Obstacle)
             {
                 Obstacle obstacle = (Obstacle)this;
-                particle.GetComponent<Particle>().SetColor(obstacle.type.ToString());
+                particle.GetComponent<Particle>().SetColor(obstacle.obstacleType.ToString());
             }
             else if (type == BlockType.TNT)
             {
