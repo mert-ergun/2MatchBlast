@@ -83,5 +83,58 @@ public class GameManager : Singleton<GameManager>
         CurrentGameState = GameState.Idle;
     }
 
+    public void UpdateGoals()
+    {
+        for (int i = 0; i < LevelInitializer.Instance.levelData.goals.Length; i++)
+        {
+            LevelGoal goal = LevelInitializer.Instance.levelData.goals[i];
+            Debug.Log("Goal type: " + goal.type);
+            Debug.Log("Goal count: " + goal.count);
+            goal.count = 0;
+
+            for (int x = 0; x < GridManager.Instance.GetRow(); x++)
+            {
+                for (int y = 0; y < GridManager.Instance.GetColumn(); y++)
+                {
+                    Block block = GridManager.Instance.GetBlock(x, y);
+                    if (block != null && block.type == Block.BlockType.Obstacle)
+                    {
+                        Obstacle obstacle = (Obstacle)block;
+                        switch (goal.type)
+                        {
+                            case "bo":
+                                if (obstacle.obstacleType == Obstacle.ObstacleType.Box)
+                                {
+                                    goal.count++;
+                                }
+                                break;
+                            case "s":
+                                if (obstacle.obstacleType == Obstacle.ObstacleType.Stone)
+                                {
+                                    goal.count++;
+                                }
+                                break;
+                            case "v":
+                                if (obstacle.obstacleType == Obstacle.ObstacleType.Vase)
+                                {
+                                    goal.count++;
+                                }
+                                break;
+                            default:
+                                Debug.LogError("Unknown obstacle type: " + goal.type);
+                                break;
+                        }
+                    }
+                }
+            }
+
+            // Update the corresponding goal display
+            if (i < LevelInitializer.Instance.goalDisplays.Count)
+            {
+                LevelInitializer.Instance.goalDisplays[i].UpdateGoalDisplay(goal.count);
+            }
+        }
+
+    }
 
 }

@@ -7,6 +7,7 @@ public class GoalDisplay : MonoBehaviour
 {
     public Image obstacleImage; 
     public TextMeshProUGUI countText;
+    public Image goalCheck;
 
     public Sprite Vase;
     public Sprite Box;
@@ -16,6 +17,7 @@ public class GoalDisplay : MonoBehaviour
     {
         obstacleImage.sprite = GetSpriteForObstacle(goal.type);
         countText.text = goal.count.ToString();
+        goalCheck.enabled = false;
     }
 
     private Sprite GetSpriteForObstacle(string obstacleType)
@@ -32,4 +34,18 @@ public class GoalDisplay : MonoBehaviour
                 return null;
         }
     }
+
+    public void UpdateGoalDisplay(int newCount)
+    {
+        countText.text = newCount.ToString();
+
+        // If the goal is completed, change the count text to goal_check sprite
+        if (newCount == 0)
+        {
+            countText.enabled = false;
+            goalCheck.enabled = true;
+            
+        }
+    }
+
 }

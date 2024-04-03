@@ -48,6 +48,10 @@ public class GridManager : Singleton<GridManager>
 
     public IEnumerator HandleBlockTap(Block block)
     {
+        if (block.type != Block.BlockType.Cube)
+        {
+            yield break;
+        }
         List<Block> connectedBlocks = FindConnectedBlocks(block);
 
         if (connectedBlocks.Count == 1)
@@ -59,7 +63,7 @@ public class GridManager : Singleton<GridManager>
         else if (connectedBlocks.Count >= 2)
         {
             block.GetComponent<Animator>().SetTrigger("Clicked");
-            yield return new WaitForSeconds(0.2f);
+            yield return new WaitForSeconds(0.1f);
             GameManager.Instance.StartFalling();
             GameManager.Instance.UseMove();
             // Reverse the order of the blocks to destroy the bottom blocks first
@@ -81,7 +85,8 @@ public class GridManager : Singleton<GridManager>
 
                 ObjectPool.Instance.ReturnToPool(connectedBlock.type.ToString(), connectedBlock.gameObject);
                 // Remove the block from the grid
-                grid[connectedBlock.GetX(), connectedBlock.GetY()] = null;   
+                grid[connectedBlock.GetX(), connectedBlock.GetY()] = null;
+                GameManager.Instance.UpdateGoals();
             }
 
             // Add connected obstacles to the connected blocks list to create new blocks instead of obstacles

@@ -6,6 +6,7 @@ using TMPro;
 using UnityEditor.Build.Reporting;
 using System.Linq;
 using UnityEditor;
+using System.Collections.Generic;
 
 [System.Serializable]
 public class LevelData
@@ -25,7 +26,7 @@ public class LevelGoal
     public int count;
 }
 
-public class LevelInitializer : MonoBehaviour
+public class LevelInitializer : Singleton<LevelInitializer>
 {
     public GameObject gridBackground;
     public TextMeshProUGUI moveCountText;
@@ -37,6 +38,8 @@ public class LevelInitializer : MonoBehaviour
     public Transform goalParent;
     public LevelSaver levelSaver;
     public GameObject blocks;
+    public LevelData levelData;
+    public List<GoalDisplay> goalDisplays = new List<GoalDisplay>();
 
     public float step;
 
@@ -54,7 +57,7 @@ public class LevelInitializer : MonoBehaviour
     {
         // Read JSON file
         string jsonContents = File.ReadAllText(pathToJson);
-        LevelData levelData = JsonUtility.FromJson<LevelData>(jsonContents);
+        levelData = JsonUtility.FromJson<LevelData>(jsonContents);
 
         // Get block size
         Vector2 blockSize = blockPrefab.GetComponent<SpriteRenderer>().size;
@@ -155,6 +158,8 @@ public class LevelInitializer : MonoBehaviour
 
     private void InitializeGoals(LevelData levelData)
     {
+        goalDisplays.Clear();
+
         int goalsCount = levelData.goals.Length;
         Vector2 parentSize = goalParent.GetComponent<RectTransform>().sizeDelta;
         float goalSize;
@@ -210,6 +215,7 @@ public class LevelInitializer : MonoBehaviour
             if (goalDisplay != null)
             {
                 goalDisplay.SetupGoal(levelData.goals[i]);
+                goalDisplays.Add(goalDisplay);
             }
         }
     }
