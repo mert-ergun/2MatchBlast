@@ -34,7 +34,7 @@ public class TNT : Block
 
     public override void SetType(string blockType)
     {
-        if (blockType == "t")
+        if (blockType == "TNT")
         {
             type = BlockType.TNT;
         }

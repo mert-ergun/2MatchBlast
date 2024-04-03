@@ -85,6 +85,11 @@ public class ObjectPool : Singleton<ObjectPool>
             return;
         }
 
+        if (tag == "Cube")
+        {
+            objectToReturn.GetComponent<Cube>().SetNormal();
+        }
+
         objectToReturn.SetActive(false);
         objectToReturn.transform.SetParent(objectToReturn.GetComponent<RectTransform>() != null ? null : transform);
         poolDictionary[tag].Enqueue(objectToReturn);

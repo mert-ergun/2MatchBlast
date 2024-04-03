@@ -31,6 +31,8 @@ public class GridManager : Singleton<GridManager>
 
         // Set the topY value
         topY = grid[0, 0].transform.position.y;
+
+        CheckForTNT();
     }
 
     public void PrintGrid()
@@ -58,7 +60,7 @@ public class GridManager : Singleton<GridManager>
         {
             // Play jiggle animation
             block.GetComponent<Animator>().SetTrigger("Jiggle");
-        }
+        } 
 
         else if (connectedBlocks.Count >= 2)
         {
@@ -100,9 +102,22 @@ public class GridManager : Singleton<GridManager>
             }
 
             ClearIsExploded();
+            
+            if (connectedBlocks.Count >= 5)
+            {
+                // Spawn a TNT block at the position of the tapped block
+                Block tntBlock = ObjectPool.Instance.SpawnFromPool("TNT", block.transform.position, Quaternion.identity).GetComponent<Block>();
+                tntBlock.SetType("TNT");
+                SetBlock(block.GetX(), block.GetY(), tntBlock);
+                tntBlock.SetX(block.GetX());
+                tntBlock.SetY(block.GetY());
+                tntBlock.GetComponent<SpriteRenderer>().sortingOrder = (row - tntBlock.GetX() - 1) * column + tntBlock.GetY();
+                connectedBlocks.Remove(block);
+            }
 
             // Add connected obstacles to the connected blocks list to create new blocks instead of obstacles
             connectedBlocks.AddRange(allObstacles);
+
 
             GameManager.Instance.FallBlock();
 
@@ -132,6 +147,7 @@ public class GridManager : Singleton<GridManager>
             }
             yield return new WaitForSeconds(0.01f * connectedBlocks.Count);
             GameManager.Instance.StopFalling();
+            CheckForTNT();
         }
     }
 
@@ -244,6 +260,7 @@ public class GridManager : Singleton<GridManager>
                 {
                     continue;
                 }
+                
                 Cube neighborCube = (Cube)neighbor;
 
                 if (!visitedBlocks.Contains(neighbor) && cube.color == neighborCube.color)
@@ -298,6 +315,39 @@ public class GridManager : Singleton<GridManager>
         }
 
         return false;
+    }
+
+    public void CheckForTNT()
+    {
+        // Check the whole grid, if there are 5 blocks of the same color in a sequence, call their setTNT method
+        for (int x = 0; x < row; x++)
+        {
+            for (int y = 0; y < column; y++)
+            {
+                if (grid[x, y] == null || grid[x, y].type != Block.BlockType.Cube)
+                {
+                    continue;
+                }
+                Block block = grid[x, y];
+                List<Block> connectedBlocks = FindConnectedBlocks(block);
+                if (connectedBlocks.Count >= 5)
+                {
+                    for (int i = 0; i < connectedBlocks.Count; i++)
+                    {
+                        Cube cube = (Cube)connectedBlocks[i];
+                        cube.SetTNT();
+                    }
+                } else
+                {
+                       for (int i = 0; i < connectedBlocks.Count; i++)
+                    {
+                        Cube cube = (Cube)connectedBlocks[i];
+                        cube.SetNormal();
+                    }
+                }
+                
+            }
+        }
     }
 
     public Block GetBlock(int x, int y)

@@ -114,6 +114,12 @@ public class Cube : Block
         UpdateCubeAppearance();
     }
 
+    public void SetNormal()
+    {
+        cubeType = CubeType.Normal;
+        UpdateCubeAppearance();
+    }
+
     private CubeColor GetRandomColor()
     {
         return (CubeColor)Random.Range(0, 4);
