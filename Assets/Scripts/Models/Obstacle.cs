@@ -1,3 +1,4 @@
+using System.Collections;
 using UnityEngine;
 
 public class Obstacle : Block
@@ -102,6 +103,7 @@ public class Obstacle : Block
                 Sprite sprite = GetComponent<SpriteRenderer>().sprite;
                 if (sprite == vaseSprite1)
                 {
+                    ShakeVase();
                     GetComponent<SpriteRenderer>().sprite = vaseSprite2;
                 }
                 else
@@ -116,4 +118,34 @@ public class Obstacle : Block
                 break;
         }
     }
+
+    private IEnumerator ShakeVaseCoroutine(float duration, float magnitude)
+    {
+        Vector3 originalPosition = transform.position;
+        float elapsed = 0.0f;
+
+        while (elapsed < duration)
+        {
+            float x = originalPosition.x + Random.Range(-1f, 1f) * magnitude;
+            float y = originalPosition.y + Random.Range(-1f, 1f) * magnitude;
+
+            transform.position = new Vector3(x, y, originalPosition.z);
+            elapsed += Time.deltaTime;
+
+            yield return null; // Wait until the next frame
+        }
+
+        // Return the vase to its original position
+        transform.position = originalPosition;
+    }
+
+    private void ShakeVase()
+    {
+        if (obstacleType == ObstacleType.Vase)
+        {
+            // Start the shake coroutine with desired duration and magnitude
+            StartCoroutine(ShakeVaseCoroutine(0.1f, 0.02f));
+        }
+    }
+
 }

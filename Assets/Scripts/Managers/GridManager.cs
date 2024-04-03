@@ -130,7 +130,7 @@ public class GridManager : Singleton<GridManager>
                      newBlock.Fall(1);
                 }
             }
-            yield return new WaitForSeconds(0.05f * connectedBlocks.Count);
+            yield return new WaitForSeconds(0.01f * connectedBlocks.Count);
             GameManager.Instance.StopFalling();
         }
     }
