@@ -1032,6 +1032,14 @@ MonoBehaviour:
   goalParent: {fileID: 1014335933}
   levelSaver: {fileID: 951862666}
   blocks: {fileID: 213275688}
+  levelData:
+    level_number: 0
+    grid_width: 0
+    grid_height: 0
+    move_count: 0
+    grid: []
+    goals: []
+  goalDisplays: []
   step: 0
 --- !u!4 &1561507633
 Transform:

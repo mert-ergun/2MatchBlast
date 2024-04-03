@@ -191,9 +191,12 @@ public class LevelInitializer : Singleton<LevelInitializer>
             TextMeshProUGUI goalText = goalObject.GetComponentInChildren<TextMeshProUGUI>();
             goalText.fontSize = (goalsCount == 1 ? defaultFontSize : (defaultFontSize / 2));
             goalText.rectTransform.sizeDelta = new Vector2(goalSize, goalSize);
+            Image goalCheck = goalObject.transform.Find("GoalCheck").GetComponent<Image>();
+            goalCheck.rectTransform.sizeDelta /= goalsCount;
             if (goalsCount >= 2)
             {
                 goalText.rectTransform.anchoredPosition = new Vector2(15, -20);
+                goalCheck.rectTransform.anchoredPosition = new Vector2(15, -15);
             }
 
             // If there are two goals, place them side by side

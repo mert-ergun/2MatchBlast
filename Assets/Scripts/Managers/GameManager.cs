@@ -88,8 +88,6 @@ public class GameManager : Singleton<GameManager>
         for (int i = 0; i < LevelInitializer.Instance.levelData.goals.Length; i++)
         {
             LevelGoal goal = LevelInitializer.Instance.levelData.goals[i];
-            Debug.Log("Goal type: " + goal.type);
-            Debug.Log("Goal count: " + goal.count);
             goal.count = 0;
 
             for (int x = 0; x < GridManager.Instance.GetRow(); x++)

@@ -46,7 +46,7 @@ public class Block : MonoBehaviour
 
     public System.Collections.IEnumerator FallCoroutine(int fallDistance)
     {
-        float fallSpeed = 3.0f; // Units per second
+        float fallSpeed = 4.0f; // Units per second
         float distance = Mathf.Abs((1.42f * 0.33f) * fallDistance); // Calculate the absolute fall distance
         float duration = distance / fallSpeed; // Total duration based on speed and distance
 
