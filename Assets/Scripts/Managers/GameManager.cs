@@ -5,6 +5,14 @@ using UnityEngine;
 
 public class GameManager : Singleton<GameManager>
 {
+    public enum GameState
+    {
+        Idle,
+        Falling,
+    }
+
+    public GameState CurrentGameState { get; private set; } = GameState.Idle;
+
     [SerializeField]
     private TextMeshProUGUI moveCountText;
     public void HandleBlockTap(Block block)
@@ -13,9 +21,11 @@ public class GameManager : Singleton<GameManager>
         {
             return;
         }
-        StartCoroutine(GridManager.Instance.HandleBlockTap(block));
-       
 
+        if (CurrentGameState == GameState.Idle)
+        {
+            StartCoroutine(GridManager.Instance.HandleBlockTap(block));
+        }
     }
 
     public void UseMove()
@@ -61,5 +71,17 @@ public class GameManager : Singleton<GameManager>
             }
         }
     }
-    
+
+    public void StartFalling()
+    {
+        CurrentGameState = GameState.Falling;
+    }
+
+
+    public void StopFalling()
+    {
+        CurrentGameState = GameState.Idle;
+    }
+
+
 }

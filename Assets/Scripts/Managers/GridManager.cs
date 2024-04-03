@@ -11,6 +11,7 @@ public class GridManager : Singleton<GridManager>
 
     public float topY;
 
+
     public void InitializeGrid(Block[][] blocks)
     {
         row = blocks.Length;
@@ -57,6 +58,7 @@ public class GridManager : Singleton<GridManager>
 
         else if (connectedBlocks.Count >= 2)
         {
+            GameManager.Instance.StartFalling();
             GameManager.Instance.UseMove();
             // Reverse the order of the blocks to destroy the bottom blocks first
             connectedBlocks.Reverse();
@@ -96,6 +98,8 @@ public class GridManager : Singleton<GridManager>
                      newBlock.Fall(1);
                 }
             }
+            yield return new WaitForSeconds(0.15f * connectedBlocks.Count);
+            GameManager.Instance.StopFalling();
         }
     }
 

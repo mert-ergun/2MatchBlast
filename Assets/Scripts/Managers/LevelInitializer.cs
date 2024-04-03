@@ -68,6 +68,12 @@ public class LevelInitializer : MonoBehaviour
         SpriteRenderer spriteRenderer = gridBackground.GetComponent<SpriteRenderer>();
         spriteRenderer.size = gridScale;
 
+        // Set the Sprite Mask size to match the grid background
+        SpriteMask spriteMask = GameObject.Find("SpriteMask").GetComponent<SpriteMask>();
+        spriteMask.transform.position = new Vector2(0, -1.016f);
+        spriteMask.transform.localScale = new Vector3(gridScale.x * 4.7f, gridScale.y * 3.36f, 0);
+
+
         // Update move_count text
         moveCountText.text = levelData.move_count.ToString();
 

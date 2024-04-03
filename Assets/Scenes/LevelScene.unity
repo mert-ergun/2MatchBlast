@@ -646,7 +646,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 37fd9c22d1347334f8751a36af7daec0, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  level: 1
+  level: 4
 --- !u!4 &951862667
 Transform:
   m_ObjectHideFlags: 0
@@ -842,7 +842,7 @@ GameObject:
   - component: {fileID: 1502981086}
   - component: {fileID: 1502981085}
   m_Layer: 0
-  m_Name: Sprite Mask
+  m_Name: SpriteMask
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -908,8 +908,8 @@ Transform:
   m_GameObject: {fileID: 1502981084}
   serializedVersion: 2
   m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
-  m_LocalPosition: {x: 0.0332, y: -1.016, z: 0}
-  m_LocalScale: {x: 46.837055, y: 33.404594, z: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 46.83798, y: 33.404594, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 276484152}
