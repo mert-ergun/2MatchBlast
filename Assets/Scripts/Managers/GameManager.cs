@@ -28,6 +28,20 @@ public class GameManager : Singleton<GameManager>
         }
     }
 
+    public void HandleTNTTap(TNT tnt)
+    {
+        if (moveCountText.text == "0")
+        {
+            return;
+        }
+
+        if (CurrentGameState == GameState.Idle)
+        {
+            UseMove();
+            GridManager.Instance.CheckForCombo(tnt);
+        }
+    }
+
     public void UseMove()
     {
         // Update move count

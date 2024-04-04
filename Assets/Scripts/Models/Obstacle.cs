@@ -17,8 +17,6 @@ public class Obstacle : Block
     public Sprite vaseSprite2;
     public Sprite boxSprite;
 
-    public bool isExploded = false;
-
 
     void Start()
     {
@@ -97,8 +95,9 @@ public class Obstacle : Block
         switch (obstacleType)
         {
             case ObstacleType.Stone:
-                Debug.Log("Stone obstacle cannot be exploded.");
-                return;
+                this.gameObject.SetActive(false);
+                base.Explode();
+                break;
             case ObstacleType.Vase:
                 Sprite sprite = GetComponent<SpriteRenderer>().sprite;
                 if (sprite == vaseSprite1)

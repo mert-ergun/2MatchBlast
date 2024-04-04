@@ -14,6 +14,7 @@ public class Block : MonoBehaviour
     public BlockType type;
     private int x;
     private int y;
+    public bool isExploded = false;
     [SerializeField]
     public GameObject particlePrefab;
 

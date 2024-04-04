@@ -4,5 +4,5 @@ using UnityEngine;
 
 public abstract class BlockFactory : MonoBehaviour
 {
-    public abstract Block CreateBlock(string type, Vector2 pos);
+    public abstract GameObject CreateBlock(string type, Vector2 pos);
 }

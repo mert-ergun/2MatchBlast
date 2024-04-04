@@ -1,5 +1,6 @@
 using System.Collections;
 using System.Collections.Generic;
+using System.Linq;
 using UnityEngine;
 
 public class GridManager : Singleton<GridManager>
@@ -11,6 +12,7 @@ public class GridManager : Singleton<GridManager>
 
     public float topY;
 
+    private HashSet<Block> checkedTNTs = new HashSet<Block>();
 
     public void InitializeGrid(Block[][] blocks)
     {
@@ -60,8 +62,7 @@ public class GridManager : Singleton<GridManager>
         {
             // Play jiggle animation
             block.GetComponent<Animator>().SetTrigger("Jiggle");
-        } 
-
+        }
         else if (connectedBlocks.Count >= 2)
         {
             block.GetComponent<Animator>().SetTrigger("Clicked");
@@ -75,7 +76,7 @@ public class GridManager : Singleton<GridManager>
             {
                 // Play the destroy animation
                 connectedBlock.Explode();
-                
+
                 List<Block> obstacles = FindConnectedObstacles(connectedBlock);
                 allObstacles.AddRange(obstacles);
                 foreach (Block obstacle in obstacles)
@@ -84,9 +85,11 @@ public class GridManager : Singleton<GridManager>
                     if (obstacle1.obstacleType == Obstacle.ObstacleType.Vase && obstacle1.GetComponent<SpriteRenderer>().sprite == obstacle1.vaseSprite1)
                     {
                         allObstacles.Remove(obstacle);
-                    } else if (obstacle1.obstacleType == Obstacle.ObstacleType.Stone)
+                    }
+                    else if (obstacle1.obstacleType == Obstacle.ObstacleType.Stone)
                     {
                         allObstacles.Remove(obstacle);
+                        continue;
                     }
                     if (obstacle1.isExploded)
                     {
@@ -102,7 +105,7 @@ public class GridManager : Singleton<GridManager>
             }
 
             ClearIsExploded();
-            
+
             if (connectedBlocks.Count >= 5)
             {
                 // Spawn a TNT block at the position of the tapped block
@@ -118,18 +121,144 @@ public class GridManager : Singleton<GridManager>
             // Add connected obstacles to the connected blocks list to create new blocks instead of obstacles
             connectedBlocks.AddRange(allObstacles);
 
-
             GameManager.Instance.FallBlock();
-
             yield return new WaitForSeconds(0.2f);
 
-            foreach (Block connectedBlock in connectedBlocks)
+            // Group blocks by their row to handle simultaneous fall per row
+            var groupedBlocks = connectedBlocks.GroupBy(b => b.GetX()).OrderBy(g => g.Key);
+            foreach (var group in groupedBlocks)
             {
-                // Spawn a new block at the top
-                Block newBlock = ObjectPool.Instance.SpawnFromPool("Cube", new Vector3(connectedBlock.GetComponent<Transform>().position.x, topY + 1.42f * 0.33f), Quaternion.identity).GetComponent<Block>();
-                SetBlock(0, connectedBlock.GetY(), newBlock);
+                foreach (Block connectedBlock in group)
+                {
+                    // Spawn a new block at the top for each block in the same row
+                    Block newBlock = ObjectPool.Instance.SpawnFromPool("Cube", new Vector3(connectedBlock.GetComponent<Transform>().position.x, topY + 1.42f * 0.33f), Quaternion.identity).GetComponent<Block>();
+                    SetBlock(0, connectedBlock.GetY(), newBlock);
+                    newBlock.SetX(0);
+                    newBlock.SetY(connectedBlock.GetY());
+                    newBlock.GetComponent<SpriteRenderer>().sortingOrder = (row - newBlock.GetX() - 1) * column + newBlock.GetY();
+                    Cube cube = (Cube)newBlock;
+                    cube.SetType("rand");
+                    
+                    if (checkBlockCanFall(newBlock))
+                    {
+                        FallBlock(newBlock);
+                    }
+                    else
+                    {
+                        newBlock.Fall(1);
+                    }
+                }
+                yield return new WaitForSeconds(0.15f); // Wait for the current row to finish before proceeding to the next
+            }
+            CheckForTNT();
+            yield return new WaitForSeconds(0.01f * connectedBlocks.Count);
+            GameManager.Instance.StopFalling();
+        }
+    }
+
+    public void CheckForCombo(TNT tnt)
+    {
+        // Check if tnt is near another tnt
+        for (int x = tnt.GetX() - 1; x <= tnt.GetX() + 1; x++)
+        {
+            for (int y = tnt.GetY() - 1; y <= tnt.GetY() + 1; y++)
+            {
+                if (x >= 0 && x < row && y >= 0 && y < column)
+                {
+                    if (grid[x, y] != null && grid[x, y].type == Block.BlockType.TNT)
+                    {
+                        StartCoroutine(ExplodeTNT((TNT)grid[x, y], 3));
+                        return;
+                    }
+                }
+            }
+        }
+
+        StartCoroutine(ExplodeTNT(tnt, 2));
+    }
+
+    public IEnumerator ExplodeTNT(TNT tnt, int area)
+    {
+        // Trigger the explosion of the initial TNT block.
+        yield return StartCoroutine(TriggerExplosion(tnt, area));
+        GameManager.Instance.StopFalling();
+    }
+
+
+    public IEnumerator TriggerExplosion(TNT tnt, int area)
+    {
+        if (tnt == null || tnt.isExploded)
+        {
+            yield break;
+        }
+
+        checkedTNTs.Clear();
+        checkedTNTs.Add(tnt);
+
+        HashSet<Block> blocksToExplode = FindTNTNeighbors(tnt, area);
+
+        blocksToExplode.Remove(tnt);
+        tnt.Explode();
+        SetBlock(tnt.GetX(), tnt.GetY(), null);
+
+        HashSet<Block> newBlocks = new HashSet<Block>();
+        foreach (Block block in blocksToExplode)
+        {
+            newBlocks.Add(block);
+        }
+        newBlocks.Add(tnt);
+
+        GameManager.Instance.StartFalling();
+
+        foreach (Block block in blocksToExplode)
+        {
+            if (block == null)
+            {
+                newBlocks.Remove(block);
+                continue;
+            }
+
+            if (block.type == Block.BlockType.Obstacle)
+            {
+                Obstacle obstacle = (Obstacle)block;
+                if (obstacle.obstacleType == Obstacle.ObstacleType.Vase && obstacle.GetComponent<SpriteRenderer>().sprite == obstacle.vaseSprite1)
+                {
+                    newBlocks.Remove(block);
+                }
+                obstacle.Explode();
+                obstacle.isExploded = true;
+            }
+            else if (block.type == Block.BlockType.TNT)
+            {
+                block.Explode();
+                SetBlock(block.GetX(), block.GetY(), null);
+            }
+            else
+            {
+                block.Explode();
+                block.isExploded = true;
+                ObjectPool.Instance.ReturnToPool(block.type.ToString(), block.gameObject);
+            }
+            GameManager.Instance.UpdateGoals();
+        }
+
+        GameManager.Instance.FallBlock();
+
+        yield return new WaitForSeconds(0.2f);
+
+        var groupedBlocks = newBlocks.GroupBy(b => b.GetX()).OrderBy(g => g.Key);
+        foreach (var group in groupedBlocks)
+        {
+            foreach (Block block in group)
+            {
+                if (block == null)
+                {
+                    continue;
+                }
+                Block newBlock = ObjectPool.Instance.SpawnFromPool("Cube", new Vector3(block.GetComponent<Transform>().position.x, topY + 1.42f * 0.33f), Quaternion.identity).GetComponent<Block>();
+                SetBlock(0, block.GetY(), newBlock);
                 newBlock.SetX(0);
-                newBlock.SetY(connectedBlock.GetY());
+                newBlock.SetY(block.GetY());
                 newBlock.GetComponent<SpriteRenderer>().sortingOrder = (row - newBlock.GetX() - 1) * column + newBlock.GetY();
 
                 Cube cube = (Cube)newBlock;
@@ -138,17 +267,56 @@ public class GridManager : Singleton<GridManager>
                 if (checkBlockCanFall(newBlock))
                 {
                     FallBlock(newBlock);
-                    yield return new WaitForSeconds(0.15f);
                 }
                 else
                 {
-                     newBlock.Fall(1);
+                    newBlock.Fall(1);
                 }
             }
-            yield return new WaitForSeconds(0.01f * connectedBlocks.Count);
-            GameManager.Instance.StopFalling();
-            CheckForTNT();
+            yield return new WaitForSeconds(0.15f);
         }
+
+        CheckForTNT();
+        ClearIsExploded();
+        yield return new WaitForSeconds(0.01f * blocksToExplode.Count);
+        GameManager.Instance.StopFalling();
+    }
+
+
+
+    private HashSet<Block> FindTNTNeighbors(TNT tnt, int area)
+    {
+        HashSet<Block> neighbors = new HashSet<Block>();
+
+        for (int x = tnt.GetX() - area; x <= tnt.GetX() + area; x++)
+        {
+            for (int y = tnt.GetY() - area; y <= tnt.GetY() + area; y++)
+            {
+                if (x >= 0 && x < row && y >= 0 && y < column)
+                {
+                    if (grid[x, y] != null)
+                    {
+                        neighbors.Add(grid[x, y]);
+                        if (grid[x, y].type == Block.BlockType.TNT)
+                        {
+                            TNT tntNeighbor = (TNT)grid[x, y];
+                            if (!checkedTNTs.Contains(tntNeighbor))
+                            {
+                                checkedTNTs.Add(tntNeighbor);
+                                // Recursively find the neighbors of the TNT block and add them to the set
+                                HashSet<Block> newNeighbors = FindTNTNeighbors(tntNeighbor, 2);
+                                foreach (Block neighbor in newNeighbors)
+                                {
+                                    neighbors.Add(neighbor);
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+
+        return neighbors;
     }
 
     private void ClearIsExploded()

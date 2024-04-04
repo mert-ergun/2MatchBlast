@@ -7,12 +7,12 @@ public class TNTFactory : BlockFactory
     public GameObject tntPrefab;
     public GameObject blocks;
 
-    public override Block CreateBlock(string type, Vector2 pos)
+    public override GameObject CreateBlock(string type, Vector2 pos)
     {
         GameObject tnt = Instantiate(tntPrefab, pos, Quaternion.identity);
         tnt.transform.SetParent(blocks.transform);
         tnt.name = "TNT";
 
-        return tnt.GetComponent<TNT>();
+        return tnt;
     }
 }

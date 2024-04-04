@@ -99,7 +99,10 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   type: 0
+  particlePrefab: {fileID: 0}
   tntSprite: {fileID: 21300000, guid: e93e4fe9e24dbfd4a8461ca3a4e9bdf0, type: 3}
+  explodeEffect1: {fileID: 21300000, guid: 810af8b766095b648bc7efdf64d52834, type: 3}
+  explodeEffect2: {fileID: 21300000, guid: 6b98199a3b1f6ef4b87874da22c06de4, type: 3}
 --- !u!61 &-1273671428347371736
 BoxCollider2D:
   m_ObjectHideFlags: 0
