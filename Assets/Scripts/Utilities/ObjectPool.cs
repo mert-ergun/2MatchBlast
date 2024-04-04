@@ -57,8 +57,6 @@ public class ObjectPool : Singleton<ObjectPool>
 
         if (poolDictionary[tag].Count == 0)
         {
-            Debug.LogError($"Pool with tag: {tag} is empty!");
-            
             if (tag == "Cube")
             {
                 return cubeFactory.CreateBlock("rand", position);

@@ -2,6 +2,7 @@ using System.Collections;
 using System.Collections.Generic;
 using TMPro;
 using UnityEngine;
+using UnityEngine.SceneManagement;
 
 public class GameManager : Singleton<GameManager>
 {
@@ -9,12 +10,20 @@ public class GameManager : Singleton<GameManager>
     {
         Idle,
         Falling,
+        Finished
     }
 
     public GameState CurrentGameState { get; private set; } = GameState.Idle;
+    private bool isPopupActive = false;
 
     [SerializeField]
     private TextMeshProUGUI moveCountText;
+    [SerializeField]
+    private GameObject failPopup;
+    [SerializeField]
+    private GameObject winPopup;
+    [SerializeField]
+    private LevelSaver levelSaver;
     public void HandleBlockTap(Block block)
     {
         if (moveCountText.text == "0")
@@ -41,6 +50,68 @@ public class GameManager : Singleton<GameManager>
             GridManager.Instance.CheckForCombo(tnt);
         }
     }
+
+    private void Update()
+    {
+        if (CurrentGameState == GameState.Idle && !isPopupActive)
+        {
+            if (CheckGoals())
+            {
+                isPopupActive = true;
+                CurrentGameState = GameState.Finished;
+                StartCoroutine(PopupWin());
+
+            }
+
+            if (moveCountText.text == "0" && !CheckGoals())
+            {
+                isPopupActive = true;
+                CurrentGameState = GameState.Finished;
+                StartCoroutine(PopupFail());
+            }
+        }
+    }
+
+    private IEnumerator PopupFail()
+    {
+        // Activate the fail popup and overlay
+        failPopup.SetActive(true);
+        GameObject overlay = failPopup.transform.Find("Overlay").gameObject;
+        overlay.SetActive(true); 
+
+        GameObject popupContent = failPopup.transform.Find("PopupContent").gameObject; // Ensure you have a 'PopupContent' object
+        Vector3 originalScale = popupContent.transform.localScale;
+        popupContent.transform.localScale = Vector3.zero;
+
+        // Update the level text
+        GameObject popupRibbon = popupContent.transform.Find("PopupRibbon").gameObject;
+        TextMeshProUGUI levelText = popupRibbon.transform.Find("LevelText").GetComponent<TextMeshProUGUI>();
+        levelText.text = "Level " + LevelInitializer.Instance.levelData.level_number;
+
+        float duration = 0.5f;
+        float time = 0;
+
+        // Animate only the popup content scaling, not the overlay
+        while (time < duration)
+        {
+            popupContent.transform.localScale = Vector3.Lerp(Vector3.zero, originalScale, time / duration);
+            time += Time.deltaTime;
+            yield return null;
+        }
+
+        popupContent.transform.localScale = originalScale;
+    }
+
+    private IEnumerator PopupWin()
+    {
+        winPopup.SetActive(true);
+        // Wait for a short delay and then return to the main menu
+        yield return new WaitForSeconds(5f);
+        levelSaver.IncreaseLevel();
+        levelSaver.SetFromLevel(true);
+        SceneManager.LoadScene("MainScene");
+    }
+
 
     public void UseMove()
     {
@@ -155,6 +226,20 @@ public class GameManager : Singleton<GameManager>
             }
         }
 
+    }
+
+    private bool CheckGoals()
+    {
+        // Check if all goals are met
+        for (int i = 0; i < LevelInitializer.Instance.levelData.goals.Length; i++)
+        {
+            LevelGoal goal = LevelInitializer.Instance.levelData.goals[i];
+            if (goal.count > 0)
+            {
+                return false;
+            }
+        }
+        return true;
     }
 
 }

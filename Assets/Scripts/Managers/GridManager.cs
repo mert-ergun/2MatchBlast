@@ -6,6 +6,7 @@ using UnityEngine;
 public class GridManager : Singleton<GridManager>
 {
     private Block[,] grid;
+    private float[,] gridPos;
 
     private int column;
     private int row;
@@ -19,6 +20,7 @@ public class GridManager : Singleton<GridManager>
         row = blocks.Length;
         column = blocks[0].Length;
         grid = new Block[row, column];
+        gridPos = new float[row, column];
 
         // Initialize the grid
         for (int x = 0; x < row; x++)
@@ -28,6 +30,7 @@ public class GridManager : Singleton<GridManager>
                 grid[x, y] = blocks[x][y];
                 grid[x, y].SetX(x);
                 grid[x, y].SetY(y);
+                gridPos[x, y] = grid[x, y].transform.position.x;
             }
         }
 
@@ -124,6 +127,33 @@ public class GridManager : Singleton<GridManager>
             GameManager.Instance.FallBlock();
             yield return new WaitForSeconds(0.2f);
 
+            List<int[]> blocksToSpawn = FindBlocksToSpawn();
+            // Group them by their row to handle simultaneous fall per row
+            var groupedBlocks = blocksToSpawn.GroupBy(b => b[0]).OrderBy(g => g.Key);
+            foreach (var group in groupedBlocks)
+            {
+                foreach (int[] blockToSpawn in group)
+                {
+                    Block newBlock = ObjectPool.Instance.SpawnFromPool("Cube", new Vector3(gridPos[blockToSpawn[0], blockToSpawn[1]], topY + 1.42f * 0.33f), Quaternion.identity).GetComponent<Block>();
+                    SetBlock(0, blockToSpawn[1], newBlock);
+                    newBlock.SetX(0);
+                    newBlock.SetY(blockToSpawn[1]);
+                    newBlock.GetComponent<SpriteRenderer>().sortingOrder = (row - newBlock.GetX() - 1) * column + newBlock.GetY();
+                    Cube cube = (Cube)newBlock;
+                    cube.SetType("rand");
+
+                    if (checkBlockCanFall(newBlock))
+                    {
+                        FallBlock(newBlock);
+                    }
+                    else
+                    {
+                        newBlock.Fall(1);
+                    }
+                }
+                yield return new WaitForSeconds(0.15f); // Wait for the current row to finish before proceeding to the next
+            }
+            /*
             // Group blocks by their row to handle simultaneous fall per row
             var groupedBlocks = connectedBlocks.GroupBy(b => b.GetX()).OrderBy(g => g.Key);
             foreach (var group in groupedBlocks)
@@ -150,6 +180,7 @@ public class GridManager : Singleton<GridManager>
                 }
                 yield return new WaitForSeconds(0.15f); // Wait for the current row to finish before proceeding to the next
             }
+            */
             CheckForTNT();
             yield return new WaitForSeconds(0.01f * connectedBlocks.Count);
             GameManager.Instance.StopFalling();
@@ -246,21 +277,18 @@ public class GridManager : Singleton<GridManager>
 
         yield return new WaitForSeconds(0.2f);
 
-        var groupedBlocks = newBlocks.GroupBy(b => b.GetX()).OrderBy(g => g.Key);
+        List<int[]> blocksToSpawn = FindBlocksToSpawn();
+        // Group them by their row to handle simultaneous fall per row
+        var groupedBlocks = blocksToSpawn.GroupBy(b => b[0]).OrderBy(g => g.Key);
         foreach (var group in groupedBlocks)
         {
-            foreach (Block block in group)
+            foreach (int[] blockToSpawn in group)
             {
-                if (block == null)
-                {
-                    continue;
-                }
-                Block newBlock = ObjectPool.Instance.SpawnFromPool("Cube", new Vector3(block.GetComponent<Transform>().position.x, topY + 1.42f * 0.33f), Quaternion.identity).GetComponent<Block>();
-                SetBlock(0, block.GetY(), newBlock);
+                Block newBlock = ObjectPool.Instance.SpawnFromPool("Cube", new Vector3(gridPos[blockToSpawn[0], blockToSpawn[1]], topY + 1.42f * 0.33f), Quaternion.identity).GetComponent<Block>();
+                SetBlock(0, blockToSpawn[1], newBlock);
                 newBlock.SetX(0);
-                newBlock.SetY(block.GetY());
+                newBlock.SetY(blockToSpawn[1]);
                 newBlock.GetComponent<SpriteRenderer>().sortingOrder = (row - newBlock.GetX() - 1) * column + newBlock.GetY();
-
                 Cube cube = (Cube)newBlock;
                 cube.SetType("rand");
 
@@ -273,7 +301,7 @@ public class GridManager : Singleton<GridManager>
                     newBlock.Fall(1);
                 }
             }
-            yield return new WaitForSeconds(0.15f);
+            yield return new WaitForSeconds(0.15f); // Wait for the current row to finish before proceeding to the next
         }
 
         CheckForTNT();
@@ -332,6 +360,29 @@ public class GridManager : Singleton<GridManager>
                 }
             }
         }
+    }
+
+    private List<int[]> FindBlocksToSpawn()
+    {
+        // Iterate over each element in the grid, if there is a null element, check it's above elements until a non-null element is found, if there is one, don't add those null elements to the list
+        List<int[]> blocks = new List<int[]>();
+
+        for (int y = 0; y < column; y++)
+        {
+            for (int x = 0; x < row; x++)
+            {
+                if (grid[x, y] == null)
+                {
+                    int[] block = new int[] { x, y };
+                    blocks.Add(block);
+                } else
+                {
+                    break;
+                }
+            }
+        }
+
+        return blocks;
     }
 
     private bool checkBlockCanFall(Block block)

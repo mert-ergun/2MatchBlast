@@ -108,7 +108,7 @@ public class LevelInitializer : Singleton<LevelInitializer>
             {
                 blockObject = Instantiate(tntPrefab, position, Quaternion.identity);
                 blockObject.transform.parent = blocks.transform;
-                blockObject.GetComponent<TNT>().SetType(blockType);
+                blockObject.GetComponent<TNT>().SetType("TNT");
                 grid[levelData.grid_height - (i / levelData.grid_width) - 1][i % levelData.grid_width] = blockObject.GetComponent<TNT>();
             } else
             {

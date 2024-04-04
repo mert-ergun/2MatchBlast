@@ -26,7 +26,14 @@ public class LevelSaver : MonoBehaviour
                     return;
                 } else 
                 {
-                    SaveLevel();
+                    if (IsFromLevel())
+                    {
+                        SetFromLevel(false);
+                        level = PlayerPrefs.GetInt("level");
+                    } else
+                    {
+                        SaveLevel();
+                    }
                 }
             } else
             {
@@ -63,6 +70,16 @@ public class LevelSaver : MonoBehaviour
     public void SetStartedFromMainMenu(bool value)
     {
         PlayerPrefs.SetInt("fromMainMenu", value ? 1 : 0);
+    }
+
+    private bool IsFromLevel()
+    {
+        return PlayerPrefs.GetInt("fromLevel") == 1;
+    }
+
+    public void SetFromLevel(bool value)
+    {
+        PlayerPrefs.SetInt("fromLevel", value ? 1 : 0);
     }
 
     public void LoadLevel()
