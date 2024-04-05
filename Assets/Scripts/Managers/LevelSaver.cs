@@ -230,6 +230,16 @@ public class LevelSaver : Singleton<LevelSaver>
     {
         if (level == 11)
         {
+            GameSaveData level11 = new GameSaveData();
+            level11.level_number = 11;
+            level11.grid_width = 0;
+            level11.grid_height = 0;
+            level11.move_count = 0;
+            level11.grid = new string[0];
+            string json11 = JsonUtility.ToJson(level11);
+            PlayerPrefs.SetString("lastSave", json11);
+            PlayerPrefs.DeleteKey("gridPos");
+            PlayerPrefs.Save();
             return;
         }
         string jsonPath = "Assets/Levels/level_" + level.ToString("00") + ".json";
