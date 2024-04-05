@@ -1,9 +1,13 @@
-using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
 
+/// <summary>
+/// Base class for blocks in the game, defining common properties and behaviors.
+/// </summary>
 public class Block : MonoBehaviour
 {
+    /// <summary>
+    /// Enum representing the types of blocks.
+    /// </summary>
     public enum BlockType
     {
         Cube,
@@ -15,36 +19,59 @@ public class Block : MonoBehaviour
     private int x;
     private int y;
     public bool isExploded = false;
+
+    /// <summary>
+    /// Prefab for the particle effect when the block is activated or interacts in the game.
+    /// </summary>
     [SerializeField]
     public GameObject particlePrefab;
 
-    // When clicked, activate the block
+    /// <summary>
+    /// Activates the block when it is clicked.
+    /// </summary>
     protected virtual void OnMouseDown()
     {
         ActivateBlock();
     }
 
-    // Common functionality that might be overridden in derived classes
+    /// <summary>
+    /// Contains common activation logic for a block, which can be overridden in derived classes.
+    /// </summary>
     public virtual void ActivateBlock()
     { 
         
     }
 
+    /// <summary>
+    /// Deactivates the block, making it inactive in the scene.
+    /// </summary>
     public virtual void DeactivateBlock()
     {
         gameObject.SetActive(false);
     }
 
+    /// <summary>
+    /// Sets the block type. This method can be overridden in derived classes to provide custom behavior.
+    /// </summary>
+    /// <param name="blockType">The type of block to set.</param>
     public virtual void SetType(string blockType)
     {
-        // Basic implementation; specific types will override this
+
     }
 
+    /// <summary>
+    /// Initiates the block's falling behavior. Starts a coroutine to animate the block falling.
+    /// </summary>
+    /// <param name="fallDistance">The distance the block should fall.</param>
     public void Fall(int fallDistance)
     {
         StartCoroutine(FallCoroutine(fallDistance));
     }
 
+    /// <summary>
+    /// Coroutine to handle the block falling with animation.
+    /// </summary>
+    /// <param name="fallDistance">The distance the block should fall.</param>
     public System.Collections.IEnumerator FallCoroutine(int fallDistance)
     {
         float fallSpeed = 4.0f; // Units per second
@@ -90,6 +117,9 @@ public class Block : MonoBehaviour
         transform.position = endPos; // Ensure the block ends up exactly at the end position
     }
 
+    /// <summary>
+    /// Triggers the explosion behavior of the block, with visual and physical effects. TNT blocks override this method.
+    /// </summary>
     public virtual void Explode()
     {
         // Instantiate some particles

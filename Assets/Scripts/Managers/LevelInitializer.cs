@@ -1,13 +1,14 @@
 using UnityEngine;
 using System.IO;
 using UnityEngine.UI;
-using static Unity.Collections.AllocatorManager;
 using TMPro;
-using UnityEditor.Build.Reporting;
 using System.Linq;
 using UnityEditor;
 using System.Collections.Generic;
 
+/// <summary>
+/// Used to store the data of a level from a JSON file.
+/// </summary>
 [System.Serializable]
 public class LevelData
 {
@@ -19,6 +20,9 @@ public class LevelData
     public LevelGoal[] goals = new LevelGoal[0];
 }
 
+/// <summary>
+/// Used to store the goal data of a level from a JSON file.
+/// </summary>
 [System.Serializable]
 public class LevelGoal
 {
@@ -26,6 +30,9 @@ public class LevelGoal
     public int count;
 }
 
+/// <summary>
+/// Used to initialize the level based on the JSON file or Last Save.
+/// </summary>
 public class LevelInitializer : Singleton<LevelInitializer>
 {
     public GameObject gridBackground;
@@ -36,15 +43,19 @@ public class LevelInitializer : Singleton<LevelInitializer>
     public GameObject tntPrefab;
     public GameObject goalPrefab;
     public Transform goalParent;
-    public LevelSaver levelSaver;
     public GameObject blocks;
     public LevelData levelData;
     public List<GoalDisplay> goalDisplays = new List<GoalDisplay>();
 
+    // Step is the distance between two blocks
     public float step;
 
+    /// <summary>
+    /// Starts the level based on the JSON file or Last Save.
+    /// </summary>
     private void Start()
     {
+        // If the level is being replayed, load the level from the JSON file
         if (LevelSaver.Instance.replayLevel)
         {
             InitializeLevel("Assets/Levels/level_" + LevelSaver.Instance.level.ToString("00") +".json", false);
@@ -52,17 +63,22 @@ public class LevelInitializer : Singleton<LevelInitializer>
             return;
         }
 
-
-        if (levelSaver.IsLastSave())
+        // If there is a last save, load the last save
+        if (LevelSaver.Instance.IsLastSave())
         {
             InitializeLevel(LevelSaver.Instance.LoadLastSave(), true);
             return;
         }
 
-
+        // Load the level from the JSON file
         InitializeLevel("Assets/Levels/level_" + LevelSaver.Instance.level.ToString("00") + ".json", false);
     }
 
+    /// <summary>
+    /// Initializes the level based on the JSON file or Last Save.
+    /// </summary>
+    /// <param name="pathToJson">Path to the JSON file</param>
+    /// <param name="saved">True if the level is loaded from the Last Save, false otherwise</param>
     private void InitializeLevel(string pathToJson, bool saved)
     {
         string jsonContents;
@@ -83,17 +99,15 @@ public class LevelInitializer : Singleton<LevelInitializer>
         // Calculate step based on block size
         step = blockSize.x * blockPrefab.transform.localScale.x;
 
-
         // Stretch grid_background based on grid_width and grid_height
         Vector2 gridScale = new Vector2(levelData.grid_width - step / 2, levelData.grid_height - (step / 2) + 0.066f);
         SpriteRenderer spriteRenderer = gridBackground.GetComponent<SpriteRenderer>();
         spriteRenderer.size = gridScale;
 
-        // Set the Sprite Mask size to match the grid background
+        // Set the Sprite Mask size to match the grid background, this mask will be used to hide the blocks outside the grid
         SpriteMask spriteMask = GameObject.Find("SpriteMask").GetComponent<SpriteMask>();
         spriteMask.transform.position = new Vector2(0, -1.016f);
         spriteMask.transform.localScale = new Vector3(gridScale.x * 4.7f, gridScale.y * 3.36f, 0);
-
 
         // Update move_count text
         moveCountText.text = levelData.move_count.ToString();
@@ -133,9 +147,7 @@ public class LevelInitializer : Singleton<LevelInitializer>
                 // Empty block
                 grid[levelData.grid_height - (i / levelData.grid_width) - 1][i % levelData.grid_width] = null;
                 continue;
-            }
-            
-            else
+            } else
             {
                 blockObject = Instantiate(obstaclePrefab, position, Quaternion.identity);
                 blockObject.transform.parent = blocks.transform;
@@ -163,6 +175,10 @@ public class LevelInitializer : Singleton<LevelInitializer>
         InitializeGoals(levelData);
     }
 
+    /// <summary>
+    /// Calculates the position of a block based on the index, grid width, and grid height.
+    /// </summary>
+    /// <returns>Position of the block</returns>
     private Vector2 CalculatePosition(int index, int width, int height)
     {
         // Find the grid background's position, get it's left-bottom corner, first block will be placed there, then move to the right until width is reached, then move up
@@ -181,6 +197,9 @@ public class LevelInitializer : Singleton<LevelInitializer>
         return new Vector2(xPosition, yPosition);
     }
 
+    /// <summary>
+    /// Initializes the goals of the level.
+    /// </summary>
     private void InitializeGoals(LevelData levelData)
     {
         goalDisplays.Clear();
@@ -190,16 +209,15 @@ public class LevelInitializer : Singleton<LevelInitializer>
         float goalSize;
         int defaultFontSize = 36;
 
-        // Assuming the parent is a horizontal layout group or similar
         // Adjust the spacing or layout settings based on the number of goals
         if (goalsCount == 1)
         {
             // If there's only one goal, it should take the full size of the parent
-            goalSize = parentSize.x; // Assuming a square goal for simplicity
+            goalSize = parentSize.x; 
         }
         else
         {
-            // If there are two or more goals, they should be half the width of the parent
+            // If there are two or more goals, they should be smaller and side by side
             goalSize = parentSize.x / 1.5f;
         } 
         
@@ -247,8 +265,4 @@ public class LevelInitializer : Singleton<LevelInitializer>
             }
         }
     }
-
-
-
-
 }

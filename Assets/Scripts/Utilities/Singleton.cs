@@ -1,10 +1,24 @@
 using UnityEngine;
 
+/// <summary>
+/// A generic singleton class that ensures only one instance of a MonoBehaviour-derived class exists in the scene.
+/// </summary>
+/// <typeparam name="T">The type of the singleton instance.</typeparam>
 public class Singleton<T> : MonoBehaviour where T : MonoBehaviour
 {
+    /// <summary>
+    /// The single instance of the class.
+    /// </summary>
     private static T instance;
+
+    /// <summary>
+    /// Lock object for thread-safe initialization.
+    /// </summary>
     private static readonly object syncLock = new object();
 
+    /// <summary>
+    /// Public accessor for the instance.
+    /// </summary>
     public static T Instance
     {
         get
@@ -20,6 +34,10 @@ public class Singleton<T> : MonoBehaviour where T : MonoBehaviour
         }
     }
 
+    /// <summary>
+    /// Finds the instance in the scene or logs an error if none is found.
+    /// </summary>
+    /// <returns>The found instance of type T.</returns>
     private static T FindInstance()
     {
         T foundObject = FindObjectOfType<T>();
@@ -30,6 +48,9 @@ public class Singleton<T> : MonoBehaviour where T : MonoBehaviour
         return foundObject;
     }
 
+    /// <summary>
+    /// Ensures that only one instance of this Singleton exists.
+    /// </summary>
     protected virtual void Awake()
     {
         lock (syncLock)

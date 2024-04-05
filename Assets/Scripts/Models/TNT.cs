@@ -1,30 +1,41 @@
 using UnityEngine;
 
+/// <summary>
+/// Represents a TNT block with specific behaviors and appearance, especially during explosion.
+/// </summary>
 public class TNT : Block
 {
+    /// <summary>
+    /// The default sprite for the TNT block.
+    /// </summary>
     public Sprite tntSprite;
 
+    // Sprites for the explosion effects
     public Sprite explodeEffect1;
     public Sprite explodeEffect2;
 
+    /// <summary>
+    /// Initializes the TNT block's appearance.
+    /// </summary>
     void Start()
     {
         UpdateTNTAppearance();
     }
 
-    protected override void OnMouseDown()
-    {
-        base.OnMouseDown();
-    }
-
+    /// <summary>
+    /// Activates the TNT block, triggering specific logic and interactions in the game.
+    /// </summary>
     public override void ActivateBlock()
     {
         base.ActivateBlock();
-        // Additional activation logic for TNT
 
+        // Additional activation logic for TNT
         GameManager.Instance.HandleTNTTap(this);
     }
 
+    /// <summary>
+    /// Updates the appearance of the TNT block based on its state.
+    /// </summary>
     private void UpdateTNTAppearance()
     {
         SpriteRenderer spriteRenderer = GetComponent<SpriteRenderer>();
@@ -37,6 +48,10 @@ public class TNT : Block
         spriteRenderer.sprite = tntSprite;
     }
 
+    /// <summary>
+    /// Sets the type of the block to TNT. Always sets the type to TNT.
+    /// </summary>
+    /// <param name="blockType">The type to be assigned to the block.</param>
     public override void SetType(string blockType)
     {
         if (blockType == "TNT")
@@ -45,11 +60,17 @@ public class TNT : Block
         }
     }
 
+    /// <summary>
+    /// Triggers the explosion effect for the TNT block.
+    /// </summary>
     public override void Explode()
     {
         StartCoroutine(ExplodeEffect());
     }
 
+    /// <summary>
+    /// A coroutine that handles the visual effect of the TNT explosion.
+    /// </summary>
     private System.Collections.IEnumerator ExplodeEffect()
     {
         SpriteRenderer spriteRenderer = GetComponent<SpriteRenderer>();

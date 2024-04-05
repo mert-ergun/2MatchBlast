@@ -1,16 +1,23 @@
 using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
 
+/// <summary>
+/// Manages the behavior and properties of a particle object in the game.
+/// </summary>
 public class Particle : MonoBehaviour
 {
+    /// <summary>
+    /// The lifetime duration of the particle before it is returned to the object pool.
+    /// </summary>
     public float lifetime = 2.0f;
 
+    // Sprites for different cube particles
     public Sprite red;
     public Sprite green;
     public Sprite blue;
     public Sprite yellow;
 
+    // Sprites for different obstacle particles
     public Sprite vase1;
     public Sprite vase2;
     public Sprite vase3;
@@ -21,12 +28,19 @@ public class Particle : MonoBehaviour
     public Sprite stone2;
     public Sprite stone3;
 
+    /// <summary>
+    /// Returns the particle to the object pool after its lifetime expires.
+    /// </summary>
     public IEnumerator ReturnToPool()
     {
         yield return new WaitForSeconds(lifetime);
         ObjectPool.Instance.ReturnToPool("Particle", gameObject);
     }
 
+    /// <summary>
+    /// Sets the particle's sprite based on the specified color or material type.
+    /// </summary>
+    /// <param name="color">The color or material type of the particle.</param>
     public void SetColor(string color)
     {
         switch (color)

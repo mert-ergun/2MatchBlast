@@ -1,11 +1,16 @@
 using System.Collections;
-using System.Collections.Generic;
 using TMPro;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 
+/// <summary>
+/// Manages the core game logic, including game states, moves, and popups.
+/// </summary>
 public class GameManager : Singleton<GameManager>
 {
+    /// <summary>
+    /// Defines possible states of the game.
+    /// </summary>
     public enum GameState
     {
         Idle,
@@ -13,6 +18,9 @@ public class GameManager : Singleton<GameManager>
         Finished
     }
 
+    /// <summary>
+    /// Current state of the game.
+    /// </summary>
     public GameState CurrentGameState { get; private set; } = GameState.Idle;
     private bool isPopupActive = false;
 
@@ -24,8 +32,14 @@ public class GameManager : Singleton<GameManager>
     private GameObject winPopup;
     [SerializeField]
     private LevelSaver levelSaver;
+
+    /// <summary>
+    /// Handles tap actions on blocks within the game.
+    /// </summary>
+    /// <param name="block">The block that was tapped.</param>
     public void HandleBlockTap(Block block)
     {
+        // Prevents block taps when there are no moves left
         if (moveCountText.text == "0")
         {
             return;
@@ -37,6 +51,10 @@ public class GameManager : Singleton<GameManager>
         }
     }
 
+    /// <summary>
+    /// Handles tap actions on TNT objects within the game.
+    /// </summary>
+    /// <param name="tnt">The TNT that was tapped.</param>
     public void HandleTNTTap(TNT tnt)
     {
         if (moveCountText.text == "0")
@@ -51,6 +69,9 @@ public class GameManager : Singleton<GameManager>
         }
     }
 
+    /// <summary>
+    /// Updates the game state and activates popups based on game progress.
+    /// </summary>
     private void Update()
     {
         if (CurrentGameState == GameState.Idle && !isPopupActive)
@@ -60,7 +81,6 @@ public class GameManager : Singleton<GameManager>
                 isPopupActive = true;
                 CurrentGameState = GameState.Finished;
                 StartCoroutine(PopupWin());
-
             }
 
             if (moveCountText.text == "0" && !CheckGoals())
@@ -72,18 +92,19 @@ public class GameManager : Singleton<GameManager>
         }
     }
 
+    /// <summary>
+    /// Activates the failure popup and processes relevant UI changes.
+    /// </summary>
     private IEnumerator PopupFail()
     {
-        // Activate the fail popup and overlay
         failPopup.SetActive(true);
         GameObject overlay = failPopup.transform.Find("Overlay").gameObject;
-        overlay.SetActive(true); 
+        overlay.SetActive(true);
 
-        GameObject popupContent = failPopup.transform.Find("PopupContent").gameObject; // Ensure you have a 'PopupContent' object
+        GameObject popupContent = failPopup.transform.Find("PopupContent").gameObject;
         Vector3 originalScale = popupContent.transform.localScale;
         popupContent.transform.localScale = Vector3.zero;
 
-        // Update the level text
         GameObject popupRibbon = popupContent.transform.Find("PopupRibbon").gameObject;
         TextMeshProUGUI levelText = popupRibbon.transform.Find("LevelText").GetComponent<TextMeshProUGUI>();
         levelText.text = "Level " + LevelInitializer.Instance.levelData.level_number;
@@ -91,7 +112,6 @@ public class GameManager : Singleton<GameManager>
         float duration = 0.5f;
         float time = 0;
 
-        // Animate only the popup content scaling, not the overlay
         while (time < duration)
         {
             popupContent.transform.localScale = Vector3.Lerp(Vector3.zero, originalScale, time / duration);
@@ -100,32 +120,37 @@ public class GameManager : Singleton<GameManager>
         }
 
         popupContent.transform.localScale = originalScale;
-
         LevelSaver.Instance.SetLevelFromJson();
     }
 
+    /// <summary>
+    /// Activates the win popup and transitions to the main scene after a delay.
+    /// </summary>
     private IEnumerator PopupWin()
     {
         winPopup.SetActive(true);
-        // Wait for a short delay and then return to the main menu
         yield return new WaitForSeconds(5f);
         levelSaver.IncreaseLevel();
         SceneManager.LoadScene("MainScene");
     }
 
-
+    /// <summary>
+    /// Decreases the move count when a move is used.
+    /// </summary>
     public void UseMove()
     {
-        // Update move count
         moveCountText.text = (int.Parse(moveCountText.text) - 1).ToString();
     }
 
+    /// <summary>
+    /// Initiates the block falling process for all blocks.
+    /// </summary>
     public void FallBlock()
     {
         // Fall all the blocks until they reach above another block
-        for (int x = GridManager.Instance.GetRow()-1; x >= 0; x--)
+        for (int x = GridManager.Instance.GetRow() - 1; x >= 0; x--)
         {
-            for (int y = GridManager.Instance.GetColumn()-1; y >= 0; y--)
+            for (int y = GridManager.Instance.GetColumn() - 1; y >= 0; y--)
             {
                 Block block = GridManager.Instance.GetBlock(x, y);
                 if (block != null)
@@ -166,17 +191,25 @@ public class GameManager : Singleton<GameManager>
         }
     }
 
+    /// <summary>
+    /// Sets the game state to falling, indicating blocks are currently moving.
+    /// </summary>
     public void StartFalling()
     {
         CurrentGameState = GameState.Falling;
     }
 
-
+    /// <summary>
+    /// Sets the game state to idle, indicating blocks have stopped moving.
+    /// </summary>
     public void StopFalling()
     {
         CurrentGameState = GameState.Idle;
     }
 
+    /// <summary>
+    /// Updates the goal counts based on the current state of the grid.
+    /// </summary>
     public void UpdateGoals()
     {
         for (int i = 0; i < LevelInitializer.Instance.levelData.goals.Length; i++)
@@ -220,18 +253,19 @@ public class GameManager : Singleton<GameManager>
                 }
             }
 
-            // Update the corresponding goal display
             if (i < LevelInitializer.Instance.goalDisplays.Count)
             {
                 LevelInitializer.Instance.goalDisplays[i].UpdateGoalDisplay(goal.count);
             }
         }
-
     }
 
+    /// <summary>
+    /// Checks if all level goals are met.
+    /// </summary>
+    /// <returns>True if all goals are met, false otherwise.</returns>
     private bool CheckGoals()
     {
-        // Check if all goals are met
         for (int i = 0; i < LevelInitializer.Instance.levelData.goals.Length; i++)
         {
             LevelGoal goal = LevelInitializer.Instance.levelData.goals[i];
@@ -243,9 +277,12 @@ public class GameManager : Singleton<GameManager>
         return true;
     }
 
+    /// <summary>
+    /// Retrieves the current move count.
+    /// </summary>
+    /// <returns>The number of remaining moves.</returns>
     public int GetMoveCount()
     {
         return int.Parse(moveCountText.text);
     }
-
 }

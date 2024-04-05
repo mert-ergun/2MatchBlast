@@ -1,8 +1,14 @@
 using System.Collections;
 using UnityEngine;
 
+/// <summary>
+/// Represents an obstacle block with specific types and appearances.
+/// </summary>
 public class Obstacle : Block
 {
+    /// <summary>
+    /// Defines possible types for the obstacle. Each type has a unique appearance and behavior.
+    /// </summary>
     public enum ObstacleType
     {
         Stone,
@@ -12,29 +18,23 @@ public class Obstacle : Block
 
     public ObstacleType obstacleType;
 
+    // Sprites for each type
     public Sprite stoneSprite;
     public Sprite vaseSprite1;
     public Sprite vaseSprite2;
     public Sprite boxSprite;
 
-
+    /// <summary>
+    /// Initializes the obstacle's appearance based on its type at startup.
+    /// </summary>
     void Start()
     {
         UpdateObstacleAppearance();
     }
 
-
-    protected override void OnMouseDown()
-    {
-        base.OnMouseDown();
-    }
-
-    public override void ActivateBlock()
-    {
-        base.ActivateBlock();
-        // Additional activation logic for Obstacles
-    }
-
+    /// <summary>
+    /// Updates the obstacle's sprite based on its type.
+    /// </summary>
     private void UpdateObstacleAppearance()
     {
         SpriteRenderer spriteRenderer = GetComponent<SpriteRenderer>();
@@ -61,6 +61,10 @@ public class Obstacle : Block
         }
     }
 
+    /// <summary>
+    /// Sets the obstacle's type based on a string identifier.
+    /// </summary>
+    /// <param name="blockType">A string representing the obstacle's type.</param>
     public override void SetType(string blockType)
     {
         switch (blockType)
@@ -82,14 +86,11 @@ public class Obstacle : Block
         type = BlockType.Obstacle;
 
         UpdateObstacleAppearance();
-    }   
-
-    public override void DeactivateBlock()
-    {
-        base.DeactivateBlock();
-        // Additional deactivation logic for Obstacles
     }
 
+    /// <summary>
+    /// Triggers the explosion behavior of the obstacle, with additional type-specific effects.
+    /// </summary>
     public override void Explode()
     {
         switch (obstacleType)
@@ -118,6 +119,11 @@ public class Obstacle : Block
         }
     }
 
+    /// <summary>
+    /// A coroutine to shake the vase, simulating a wobble effect.
+    /// </summary>
+    /// <param name="duration">How long the shake lasts.</param>
+    /// <param name="magnitude">The magnitude of the shake.</param>
     private IEnumerator ShakeVaseCoroutine(float duration, float magnitude)
     {
         Vector3 originalPosition = transform.position;
@@ -138,6 +144,9 @@ public class Obstacle : Block
         transform.position = originalPosition;
     }
 
+    /// <summary>
+    /// Initiates a shaking effect on the vase.
+    /// </summary>
     private void ShakeVase()
     {
         if (obstacleType == ObstacleType.Vase)

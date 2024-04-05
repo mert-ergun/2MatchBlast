@@ -1,13 +1,23 @@
-using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
-using UnityEngine.SceneManagement;
 
+/// <summary>
+/// Manages saving and loading level data, as well as player progression.
+/// </summary>
 public class LevelSaver : Singleton<LevelSaver>
 {
+    /// <summary>
+    /// Current level the player is on.
+    /// </summary>
     public int level;
+
+    /// <summary>
+    /// Flag indicating whether the current level is being replayed.
+    /// </summary>
     public bool replayLevel = false;
 
+    /// <summary>
+    /// Initializes the level data at the start of the game.
+    /// </summary>
     private void Start()
     {
         if (!PlayerPrefs.HasKey("lastSave"))
@@ -19,7 +29,9 @@ public class LevelSaver : Singleton<LevelSaver>
         }
     }
 
-    // Save current level as json
+    /// <summary>
+    /// Saves the current level's state to persistent local storage.
+    /// </summary>
     public void SaveCurrentLevel()
     {
         GameSaveData saveData = new GameSaveData();
@@ -31,7 +43,6 @@ public class LevelSaver : Singleton<LevelSaver>
 
         float[,] gridPoses = GridManager.Instance.gridPos;
 
-        // Create a new 1D string array to store the grid positions, start from the bottom left corner
         string[] gridPos = new string[(LevelInitializer.Instance.levelData.grid_width * LevelInitializer.Instance.levelData.grid_height) + 1];
         gridPos[0] = saveData.level_number.ToString();
         int index = 1;
@@ -51,6 +62,10 @@ public class LevelSaver : Singleton<LevelSaver>
         PlayerPrefs.Save();
     }
 
+    /// <summary>
+    /// Retrieves the current grid's state as an array of strings.
+    /// </summary>
+    /// <returns>An array representing the current state of the grid.</returns>
     private string[] GetCurrentGrid()
     {
         string[] grid = new string[LevelInitializer.Instance.levelData.grid_width * LevelInitializer.Instance.levelData.grid_height];
@@ -118,28 +133,47 @@ public class LevelSaver : Singleton<LevelSaver>
         return grid;
     }
 
-    // Load last saved level
+    /// <summary>
+    /// Checks if there is saved data from a previous session.
+    /// </summary>
+    /// <returns>True if there is saved data, false otherwise.</returns>
     public bool IsLastSave()
     {
         return PlayerPrefs.HasKey("lastSave");
     }
 
+    /// <summary>
+    /// Loads the last saved game data.
+    /// </summary>
+    /// <returns>The saved game data in string format.</returns>
     public string LoadLastSave()
     {
         return PlayerPrefs.GetString("lastSave");
     }
 
+    /// <summary>
+    /// Retrieves the last saved level number.
+    /// </summary>
+    /// <returns>The level number from the last save.</returns>
     public int GetLastSaveLevel()
     {
         GameSaveData saveData = JsonUtility.FromJson<GameSaveData>(LoadLastSave());
         return saveData.level_number;
     }
 
+    /// <summary>
+    /// Checks if there is saved grid position data from a previous session.
+    /// </summary>
+    /// <returns>True if there is saved grid position data, false otherwise.</returns>
     public bool CheckForGridPos()
     {
         return PlayerPrefs.HasKey("gridPos");
     }
 
+    /// <summary>
+    /// Retrieves the grid position data from the last save.
+    /// </summary>
+    /// <returns>A 2D array of floats representing the grid positions.</returns>
     public float[,] GetGridPos()
     {
         float[,] gridPos = new float[LevelInitializer.Instance.levelData.grid_height, LevelInitializer.Instance.levelData.grid_width];
@@ -160,6 +194,10 @@ public class LevelSaver : Singleton<LevelSaver>
         return gridPos;
     }
 
+    /// <summary>
+    /// Retrieves the level number from the grid position data to check if the player is on the same level.
+    /// </summary>
+    /// <returns>The level number from the grid position data.</returns>
     public int GetGridPosLevel()
     {
         string json = PlayerPrefs.GetString("gridPos");
@@ -167,18 +205,27 @@ public class LevelSaver : Singleton<LevelSaver>
         return int.Parse(strings[0]);
     }
 
+    /// <summary>
+    /// Resets the level progress to the first level.
+    /// </summary>
     public void ResetLevel()
     {
         level = 1;
         SetLevelFromJson();
     }
 
+    /// <summary>
+    /// Advances the level by one, updating the current level data accordingly.
+    /// </summary>
     public void IncreaseLevel()
     {
         level++;
         SetLevelFromJson();
     }
 
+    /// <summary>
+    /// Sets the current level data based on a JSON file corresponding to the current level.
+    /// </summary>
     public void SetLevelFromJson()
     {
         if (level == 11)

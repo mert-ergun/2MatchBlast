@@ -2,6 +2,9 @@ using System.Collections;
 using UnityEngine;
 using UnityEngine.UI;
 
+/// <summary>
+/// Manages the UI celebration effects, including particle spawning and star animation.
+/// </summary>
 public class UICelebration : MonoBehaviour
 {
     public GameObject particlePrefab;
@@ -13,6 +16,9 @@ public class UICelebration : MonoBehaviour
     public float starGrowDuration = 2.0f;  // Duration for the star to reach its full size
     public float starRotationSpeed = 50f;  // Rotation speed of the star
 
+    /// <summary>
+    /// Starts the particle spawning and star animation coroutines.
+    /// </summary>
     void Start()
     {
         // Start the particle spawning and star animation coroutines
@@ -20,6 +26,9 @@ public class UICelebration : MonoBehaviour
         StartCoroutine(AnimateStar());
     }
 
+    /// <summary>
+    /// Spawns particles around the star with varying transparency and moves them outward.
+    /// </summary>
     private IEnumerator SpawnParticles()
     {
         for (int i = 0; i < numberOfParticles; i++)
@@ -42,7 +51,11 @@ public class UICelebration : MonoBehaviour
         }
     }
 
-
+    /// <summary>
+    /// Moves and rotates a single particle in a given direction.
+    /// </summary>
+    /// <param name="particle">The particle GameObject to animate.</param>
+    /// <param name="direction">The direction to move the particle.</param>
     private IEnumerator MoveAndRotateParticle(GameObject particle, Vector3 direction)
     {
         while (particle != null)
@@ -53,6 +66,9 @@ public class UICelebration : MonoBehaviour
         }
     }
 
+    /// <summary>
+    /// Animates the star, causing it to grow to its full size and rotate.
+    /// </summary>
     private IEnumerator AnimateStar()
     {
         float time = 0;
