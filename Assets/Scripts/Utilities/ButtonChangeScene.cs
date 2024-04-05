@@ -1,6 +1,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using TMPro;
+using Unity.Mathematics;
 using UnityEditor.Build;
 using UnityEngine;
 using UnityEngine.SceneManagement;
@@ -32,7 +33,7 @@ public class ButtonChangeScene : MonoBehaviour
                 buttonText.text = "Finished";
                 return;
             }
-            buttonText.text = "Level " + levelSaver.level;
+            buttonText.text = "Level " + LevelSaver.Instance.level;
         }
     }
 
@@ -40,8 +41,6 @@ public class ButtonChangeScene : MonoBehaviour
     public void ChangeScene(string sceneName)
     {
         if (levelSaver.level == 11) return;
-        levelSaver.SaveLevel();
-        levelSaver.SetStartedFromMainMenu(true);
         StartCoroutine(ChangeSceneCoroutine(sceneName));
     }
 
@@ -53,24 +52,18 @@ public class ButtonChangeScene : MonoBehaviour
 
     public void ReplayLevel()
     {
-        int levelNumber = LevelInitializer.Instance.levelData.level_number;
-        StartCoroutine(ReplayLevelCoroutine(levelNumber));
+        LevelSaver.Instance.replayLevel = true;
+        StartCoroutine(ReplayLevelCoroutine());
     }
 
-    private IEnumerator ReplayLevelCoroutine(int levelNumber)
+    private IEnumerator ReplayLevelCoroutine()
     {
         yield return new WaitForSeconds(0.6f);
-        levelSaver.level = levelNumber;
-        levelSaver.SaveLevel();
-        levelSaver.SetStartedFromMainMenu(true);
         SceneManager.LoadScene(SceneManager.GetActiveScene().name);
     }
 
     public void ReturnToMain()
     {
-        levelSaver.level = LevelInitializer.Instance.levelData.level_number;
-        levelSaver.SaveLevel();
-        levelSaver.SetFromLevel(true);
         StartCoroutine(ReturnToMainCoroutine());
     }
 

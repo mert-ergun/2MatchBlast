@@ -100,6 +100,8 @@ public class GameManager : Singleton<GameManager>
         }
 
         popupContent.transform.localScale = originalScale;
+
+        LevelSaver.Instance.SetLevelFromJson();
     }
 
     private IEnumerator PopupWin()
@@ -108,7 +110,6 @@ public class GameManager : Singleton<GameManager>
         // Wait for a short delay and then return to the main menu
         yield return new WaitForSeconds(5f);
         levelSaver.IncreaseLevel();
-        levelSaver.SetFromLevel(true);
         SceneManager.LoadScene("MainScene");
     }
 
@@ -240,6 +241,11 @@ public class GameManager : Singleton<GameManager>
             }
         }
         return true;
+    }
+
+    public int GetMoveCount()
+    {
+        return int.Parse(moveCountText.text);
     }
 
 }

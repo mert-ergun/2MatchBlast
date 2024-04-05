@@ -6,7 +6,7 @@ using UnityEngine;
 public class GridManager : Singleton<GridManager>
 {
     private Block[,] grid;
-    private float[,] gridPos;
+    public float[,] gridPos;
 
     private int column;
     private int row;
@@ -27,6 +27,12 @@ public class GridManager : Singleton<GridManager>
         {
             for (int y = 0; y < column; y++)
             {
+                if (blocks[x][y] == null)
+                {
+                    grid[x, y] = null;
+                    continue;
+                }
+
                 grid[x, y] = blocks[x][y];
                 grid[x, y].SetX(x);
                 grid[x, y].SetY(y);
@@ -36,6 +42,11 @@ public class GridManager : Singleton<GridManager>
 
         // Set the topY value
         topY = grid[0, 0].transform.position.y;
+
+        if (LevelSaver.Instance.CheckForGridPos() && LevelSaver.Instance.GetGridPosLevel() == LevelInitializer.Instance.levelData.level_number)
+        {
+            gridPos = LevelSaver.Instance.GetGridPos();
+        }
 
         CheckForTNT();
     }
@@ -153,37 +164,11 @@ public class GridManager : Singleton<GridManager>
                 }
                 yield return new WaitForSeconds(0.15f); // Wait for the current row to finish before proceeding to the next
             }
-            /*
-            // Group blocks by their row to handle simultaneous fall per row
-            var groupedBlocks = connectedBlocks.GroupBy(b => b.GetX()).OrderBy(g => g.Key);
-            foreach (var group in groupedBlocks)
-            {
-                foreach (Block connectedBlock in group)
-                {
-                    // Spawn a new block at the top for each block in the same row
-                    Block newBlock = ObjectPool.Instance.SpawnFromPool("Cube", new Vector3(connectedBlock.GetComponent<Transform>().position.x, topY + 1.42f * 0.33f), Quaternion.identity).GetComponent<Block>();
-                    SetBlock(0, connectedBlock.GetY(), newBlock);
-                    newBlock.SetX(0);
-                    newBlock.SetY(connectedBlock.GetY());
-                    newBlock.GetComponent<SpriteRenderer>().sortingOrder = (row - newBlock.GetX() - 1) * column + newBlock.GetY();
-                    Cube cube = (Cube)newBlock;
-                    cube.SetType("rand");
-                    
-                    if (checkBlockCanFall(newBlock))
-                    {
-                        FallBlock(newBlock);
-                    }
-                    else
-                    {
-                        newBlock.Fall(1);
-                    }
-                }
-                yield return new WaitForSeconds(0.15f); // Wait for the current row to finish before proceeding to the next
-            }
-            */
+
             CheckForTNT();
             yield return new WaitForSeconds(0.01f * connectedBlocks.Count);
             GameManager.Instance.StopFalling();
+            LevelSaver.Instance.SaveCurrentLevel();
         }
     }
 
@@ -196,7 +181,7 @@ public class GridManager : Singleton<GridManager>
             {
                 if (x >= 0 && x < row && y >= 0 && y < column)
                 {
-                    if (grid[x, y] != null && grid[x, y].type == Block.BlockType.TNT)
+                    if (grid[x, y] != null && grid[x, y].type == Block.BlockType.TNT && grid[x, y] != tnt)
                     {
                         StartCoroutine(ExplodeTNT((TNT)grid[x, y], 3));
                         return;
@@ -213,6 +198,7 @@ public class GridManager : Singleton<GridManager>
         // Trigger the explosion of the initial TNT block.
         yield return StartCoroutine(TriggerExplosion(tnt, area));
         GameManager.Instance.StopFalling();
+        LevelSaver.Instance.SaveCurrentLevel();
     }
 
 

@@ -45,18 +45,36 @@ public class LevelInitializer : Singleton<LevelInitializer>
 
     private void Start()
     {
-        string pathToJson = levelSaver.level.ToString();
-        if (pathToJson.Length == 1)
+        if (LevelSaver.Instance.replayLevel)
         {
-            pathToJson = "0" + pathToJson;
+            InitializeLevel("Assets/Levels/level_" + LevelSaver.Instance.level.ToString("00") +".json", false);
+            LevelSaver.Instance.replayLevel = false;
+            return;
         }
-        InitializeLevel("Assets/Levels/level_" + pathToJson + ".json");
+
+
+        if (levelSaver.IsLastSave())
+        {
+            InitializeLevel(LevelSaver.Instance.LoadLastSave(), true);
+            return;
+        }
+
+
+        InitializeLevel("Assets/Levels/level_" + LevelSaver.Instance.level.ToString("00") + ".json", false);
     }
 
-    private void InitializeLevel(string pathToJson)
+    private void InitializeLevel(string pathToJson, bool saved)
     {
-        // Read JSON file
-        string jsonContents = File.ReadAllText(pathToJson);
+        string jsonContents;
+        if (saved)
+        {
+            jsonContents = pathToJson;
+        } else
+        {
+            // Read JSON file
+            jsonContents = File.ReadAllText(pathToJson);
+        }
+
         levelData = JsonUtility.FromJson<LevelData>(jsonContents);
 
         // Get block size
@@ -110,7 +128,14 @@ public class LevelInitializer : Singleton<LevelInitializer>
                 blockObject.transform.parent = blocks.transform;
                 blockObject.GetComponent<TNT>().SetType("TNT");
                 grid[levelData.grid_height - (i / levelData.grid_width) - 1][i % levelData.grid_width] = blockObject.GetComponent<TNT>();
-            } else
+            } else if (blockType == "n")
+            {
+                // Empty block
+                grid[levelData.grid_height - (i / levelData.grid_width) - 1][i % levelData.grid_width] = null;
+                continue;
+            }
+            
+            else
             {
                 blockObject = Instantiate(obstaclePrefab, position, Quaternion.identity);
                 blockObject.transform.parent = blocks.transform;

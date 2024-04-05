@@ -3,100 +3,197 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 
-public class LevelSaver : MonoBehaviour
+public class LevelSaver : Singleton<LevelSaver>
 {
     public int level;
+    public bool replayLevel = false;
 
     private void Start()
     {
-        // Get scene name
-        string sceneName = SceneManager.GetActiveScene().name;
-
-        // If scene name is MainMenu
-        if (sceneName == "MainScene")
+        if (!PlayerPrefs.HasKey("lastSave"))
         {
-            if (PlayerPrefs.HasKey("level"))
-            {
-                if (level < 1)
-                {
-                    ResetLevel();
-                }
-                if (PlayerPrefs.GetInt("level") == level)
-                {
-                    return;
-                } else 
-                {
-                    if (IsFromLevel())
-                    {
-                        SetFromLevel(false);
-                        level = PlayerPrefs.GetInt("level");
-                    } else
-                    {
-                        SaveLevel();
-                    }
-                }
-            } else
-            {
-                if (level < 1)
-                {
-                    ResetLevel();
-                }
-                SaveLevel();
-            } 
+            ResetLevel();
+        } else
+        {
+            level = GetLastSaveLevel();
         }
-        else if (sceneName == "LevelScene")
+    }
+
+    // Save current level as json
+    public void SaveCurrentLevel()
+    {
+        GameSaveData saveData = new GameSaveData();
+        saveData.level_number = LevelInitializer.Instance.levelData.level_number;
+        saveData.grid_width = LevelInitializer.Instance.levelData.grid_width;
+        saveData.grid_height = LevelInitializer.Instance.levelData.grid_height;
+        saveData.move_count = GameManager.Instance.GetMoveCount();
+        saveData.grid = GetCurrentGrid();
+
+        float[,] gridPoses = GridManager.Instance.gridPos;
+
+        // Create a new 1D string array to store the grid positions, start from the bottom left corner
+        string[] gridPos = new string[(LevelInitializer.Instance.levelData.grid_width * LevelInitializer.Instance.levelData.grid_height) + 1];
+        gridPos[0] = saveData.level_number.ToString();
+        int index = 1;
+        for (int x = LevelInitializer.Instance.levelData.grid_height - 1; x >= 0; x--)
         {
-            if (IsStartedFromMainMenu())
+            for (int y = 0; y < LevelInitializer.Instance.levelData.grid_width; y++)
             {
-                SetStartedFromMainMenu(false);
-                LoadLevel();
-            } else
+                gridPos[index] = gridPoses[x, y].ToString();
+                index++;
+            }
+        }
+        string jsonGridPos = string.Join(";", gridPos);
+
+        string json = JsonUtility.ToJson(saveData);
+        PlayerPrefs.SetString("lastSave", json);
+        PlayerPrefs.SetString("gridPos", jsonGridPos);
+        PlayerPrefs.Save();
+    }
+
+    private string[] GetCurrentGrid()
+    {
+        string[] grid = new string[LevelInitializer.Instance.levelData.grid_width * LevelInitializer.Instance.levelData.grid_height];
+        int index = 0;
+        // Read the grid starting from the bottom left corner
+        for (int x = LevelInitializer.Instance.levelData.grid_height - 1; x >= 0; x--)
+        {
+            for (int y = 0; y < LevelInitializer.Instance.levelData.grid_width; y++)
             {
-                SaveLevel();
-            }  
-        } 
+                Block block = GridManager.Instance.GetBlock(x, y);
+
+                if (block == null)
+                {
+                    grid[index] = "n";
+                    index++;
+                    continue;
+                }
+
+                switch (block.type)
+                {
+                    case Block.BlockType.Cube:
+                        Cube cube = (Cube)block;
+                        switch (cube.color)
+                        {
+                            case Cube.CubeColor.Red:
+                                grid[index] = "r";
+                                break;
+                            case Cube.CubeColor.Green:
+                                grid[index] = "g";
+                                break;
+                            case Cube.CubeColor.Blue:
+                                grid[index] = "b";
+                                break;
+                            case Cube.CubeColor.Yellow:
+                                grid[index] = "y";
+                                break;
+                        }
+                        break;
+
+
+                    case Block.BlockType.Obstacle:
+                        Obstacle obstacle = (Obstacle)block;
+                        switch (obstacle.obstacleType)
+                        {
+                            case Obstacle.ObstacleType.Box:
+                                grid[index] = "bo";
+                                break;
+                            case Obstacle.ObstacleType.Stone:
+                                grid[index] = "s";
+                                break;
+                            case Obstacle.ObstacleType.Vase:
+                                grid[index] = "v";
+                                break;
+                        }
+                        break;
+
+
+                    case Block.BlockType.TNT:
+                        grid[index] = "t";
+                        break;
+                }
+                index++;
+            }
+        }
+        return grid;
     }
 
-    public void SaveLevel()
+    // Load last saved level
+    public bool IsLastSave()
     {
-        PlayerPrefs.SetInt("level", level);
+        return PlayerPrefs.HasKey("lastSave");
     }
 
-    private bool IsStartedFromMainMenu()
+    public string LoadLastSave()
     {
-        return PlayerPrefs.GetInt("fromMainMenu") == 1;
+        return PlayerPrefs.GetString("lastSave");
     }
 
-    public void SetStartedFromMainMenu(bool value)
+    public int GetLastSaveLevel()
     {
-        PlayerPrefs.SetInt("fromMainMenu", value ? 1 : 0);
+        GameSaveData saveData = JsonUtility.FromJson<GameSaveData>(LoadLastSave());
+        return saveData.level_number;
     }
 
-    private bool IsFromLevel()
+    public bool CheckForGridPos()
     {
-        return PlayerPrefs.GetInt("fromLevel") == 1;
+        return PlayerPrefs.HasKey("gridPos");
     }
 
-    public void SetFromLevel(bool value)
+    public float[,] GetGridPos()
     {
-        PlayerPrefs.SetInt("fromLevel", value ? 1 : 0);
+        float[,] gridPos = new float[LevelInitializer.Instance.levelData.grid_height, LevelInitializer.Instance.levelData.grid_width];
+        string json = PlayerPrefs.GetString("gridPos");
+
+        string[] strings = json.Split(';');
+
+        int index = 1;
+        for (int x = LevelInitializer.Instance.levelData.grid_height - 1; x >= 0; x--)
+        {
+            for (int y = 0; y < LevelInitializer.Instance.levelData.grid_width; y++)
+            {
+                gridPos[x, y] = float.Parse(strings[index]);
+                index++;
+            }
+        }
+
+        return gridPos;
     }
 
-    public void LoadLevel()
+    public int GetGridPosLevel()
     {
-        level = PlayerPrefs.GetInt("level");
+        string json = PlayerPrefs.GetString("gridPos");
+        string[] strings = json.Split(';');
+        return int.Parse(strings[0]);
     }
 
     public void ResetLevel()
     {
         level = 1;
-        SaveLevel();
+        SetLevelFromJson();
     }
 
     public void IncreaseLevel()
     {
         level++;
-        SaveLevel();
+        SetLevelFromJson();
+    }
+
+    public void SetLevelFromJson()
+    {
+        if (level == 11)
+        {
+            return;
+        }
+        string jsonPath = "Assets/Levels/level_" + level.ToString("00") + ".json";
+        string jsonContents = System.IO.File.ReadAllText(jsonPath);
+        GameSaveData saveData = JsonUtility.FromJson<GameSaveData>(jsonContents);
+
+        string json = JsonUtility.ToJson(saveData);
+
+        PlayerPrefs.SetString("lastSave", json);
+        PlayerPrefs.DeleteKey("gridPos");
+        PlayerPrefs.Save();
     }
 
 }
