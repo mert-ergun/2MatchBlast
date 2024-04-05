@@ -153,6 +153,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   level: 1
+  replayLevel: 0
 --- !u!4 &32570968
 Transform:
   m_ObjectHideFlags: 0
@@ -420,7 +421,7 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_text: Level 99
+  m_text: Start
   m_isRightToLeft: 0
   m_fontAsset: {fileID: 11400000, guid: 0aac1751d517dd342a8592171939b2ed, type: 2}
   m_sharedMaterial: {fileID: -4511310217733715386, guid: 0aac1751d517dd342a8592171939b2ed, type: 2}
