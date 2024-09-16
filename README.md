@@ -1,23 +1,24 @@
-# Dream Games Software Engineering Case Study 2024
+# 2-Match Blast Game: Unity-based Portfolio Project
 
-## Overview
-A Unity-based 2-Match Blast game like Blast Toon, Toy Blast etc. developed for Dream Games internship application, without any previous unity or game development experience.
+#### Overview
+A Unity-based 2-Match Blast game inspired by popular mobile puzzle games, developed to showcase game development skills. This project was created without prior Unity or game development experience, demonstrating rapid learning and implementation abilities.
 
-## Features
-- Tap 2 same-color cubes to match and BLAST! them.
-- A simple and engaging user interface design.
-- Dynamic block generation mechanic.
-- TNT blocks to BLAST! MORE!!
-- Particle and basic animation system.
-- Patterned designs.
-- Detailed documentation in source code.
-- Level progression.
+#### Features
+- Match and blast mechanics: Tap 2 same-color cubes to match and eliminate them.
+- Engaging user interface design.
+- Dynamic block generation system.
+- Special TNT blocks for enhanced gameplay.
+- Particle effects and basic animation system.
+- Patterned level designs.
+- Detailed in-code documentation.
+- Level progression system.
 
-## Design Patterns
-In the development of this project, several design patterns were employed to ensure code modularity, scalability, and maintainability:
-- Singleton Pattern: Used for various game managers like Grid Manager, LevelSaver etc. Ensures only a single instance is available during gameplay.
-- Object Pooling: Implemented for efficient management of game objects, reducing the overhead of instantiating and destroying objects frequently. (I learned about it in the presentation given by Mr. Hakan Sağlam at METU)
-- Factory Method: Employed in the creation of blocks and particles, allowing for flexibility in extending the types of objects created without modifying the client code.
-- State Pattern: Manages the game's different states (idle, falling, finished) to ensure player moves are applicable.
+#### Design Patterns Implemented
+This project showcases the use of several key design patterns to ensure code modularity, scalability, and maintainability:
 
-## By Mert ERGÜN
+- **Singleton Pattern**: Utilized for various game managers (e.g., Grid Manager, LevelSaver) to ensure single instance availability during gameplay.
+- **Object Pooling**: Implemented for efficient management of game objects, reducing instantiation and destruction overhead.
+- **Factory Method**: Employed in the creation of blocks and particles, allowing for flexible object type extensions.
+- **State Pattern**: Manages different game states (idle, falling, finished) to control player move applicability.
+
+Developed by Mert ERGÜN
